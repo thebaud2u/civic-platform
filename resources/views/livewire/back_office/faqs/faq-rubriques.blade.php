@@ -236,7 +236,7 @@
 
 			<div class="flex flex-row justify-between">
 				<x-front.secondary-button x-on:click="$dispatch('close');" :class="'flex justify-center mt-4 s:mt-0'">
-					{{ __('Cancel') }}
+					Annuler
 				</x-front.secondary-button>
 
 				<x-front.primary-button wire:click="set" @faq-rubrique-validated.window="$dispatch('close');" :class="'flex justify-center mt-4 s:mt-0'">
@@ -269,7 +269,7 @@
 				</x-front.primary-button>
 
 				<x-front.secondary-button x-on:click="$dispatch('close');">
-					{{ __('Cancel') }}
+					Annuler
 				</x-front.secondary-button>
 			</div>
 		</section>

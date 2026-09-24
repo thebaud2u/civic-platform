@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Livewire\Backoffice\Faqs;
+namespace App\Livewire\Backoffice\Faqs;
 
 use Illuminate\Support\Facades\DB;
 

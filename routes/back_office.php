@@ -4,9 +4,7 @@ use App\Http\Controllers\BackOffice\ {
 	AuthController,
 	DashboardController,
 	FaqController,
-	PermissionController,
-	SettingController,
-	WatchController
+	UserController
 };
 use Illuminate\Support\Facades\Route;
 
@@ -17,7 +15,7 @@ use Illuminate\Support\Facades\Route;
 */
 Route::prefix('/back-office')->name('back-office.')->group(function () {
 	Route::get('/', [AuthController::class, 'index'])->name('index'); // back-office.index
-	Route::post('/login', [AuthController::class, 'login'])->name('login'); // back-office.login
+	Route::post('/login', [AuthController::class, 'store'])->name('login'); // back-office.login
 
 	/** Admin authenticated routes */
 	Route::middleware(['auth:admin'])->group(function () {
@@ -38,7 +36,7 @@ Route::prefix('/back-office')->name('back-office.')->group(function () {
 		});
 
 		Route::controller(DashboardController::class)->group(function () {
-			Route::get('/dashboard', 'index')->name('dashboard'); // back-office.dashboard
+			Route::get('/tableau-de-bord', 'index')->name('dashboard'); // back-office.dashboard
 		});
 
 		Route::controller(FaqController::class)->prefix('/faqs')->name('faqs.')->group(function() {
@@ -46,19 +44,8 @@ Route::prefix('/back-office')->name('back-office.')->group(function () {
 			Route::post('/upload', 'upload')->name('upload'); // back-office.faqs.upload
 		});
 
-		Route::controller(SettingController::class)->prefix('/settings')->name('settings.')->group(function() {
-			Route::get('/', 'index')->name('index'); // back-office.settings.index
-		});
-
-		Route::controller(PermissionController::class)->prefix('/permissions')->name('permissions.')->group(function () {
-			Route::get('/index', 'index')->name('index'); // back-office.permissions.index
-			Route::get('/create', 'create')->name('create'); // back-office.permissions.create
-			Route::get('/edit', 'edit')->name('edit'); // back-office.permissions.edit
-			Route::get('/destroy', 'destroy')->name('destroy'); // back-office.permissions.destroy
-		});
-
-		Route::controller(WatchController::class)->prefix('/watches')->name('watches.')->group(function() {
-			Route::get('/', 'index')->name('index'); // back-office.watches.index
+		Route::controller(UserController::class)->prefix('/utilisateurs')->name('users.')->group(function() {
+			Route::get('/', 'index')->name('index'); // back-office.users.index
 		});
 	});
 });

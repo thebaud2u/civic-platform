@@ -123,5 +123,5 @@ return [
 		'store' => env('APP_MAINTENANCE_STORE', 'database'),
 	],
 
-	'town-name' => env('TOWN_NAME'),
+	'town_name' => env('TOWN_NAME'),
 ];

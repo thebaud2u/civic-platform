@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\BackOffice;
 
 use App\Http\Controllers\Controller;
 
@@ -17,7 +17,7 @@ class FaqController extends Controller
 	 */
 	public function index()
 	{
-		return view('admin.faqs.index');
+		return view('back_office.faqs.index');
 	}
 
 	public function upload(Request $request)
