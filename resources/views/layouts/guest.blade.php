@@ -1,30 +1,87 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+	<title>{{ config('app.name') }}</title>
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+	<link rel="preconnect" href="https://fonts.bunny.net">
+	<link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
 
-        <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    </head>
-    <body class="font-sans text-gray-900 antialiased">
-        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
-            <div>
-                <a href="/" wire:navigate>
-                    <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
-                </a>
-            </div>
+	@vite(['resources/css/app.css', 'resources/js/app.js'])
+</head>
 
-            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">
-                {{ $slot }}
-            </div>
-        </div>
-    </body>
+<body class="min-h-screen bg-gray-50 text-gray-900 antialiased">
+
+	{{-- Header --}}
+	<header class="border-b border-gray-200 bg-white">
+		<div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+
+			{{-- Logo --}}
+			<a href="{{ url('/') }}" class="text-xl font-semibold tracking-tight text-gray-900">
+				{{ config('app.name') }}
+			</a>
+
+			{{-- Navigation --}}
+			<nav class="flex items-center gap-3">
+				@auth
+					<a
+						href="{{ url('/dashboard') }}"
+						class="rounded-md px-3 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-100 hover:text-gray-900"
+					>
+						Dashboard
+					</a>
+				@else
+					@if(request()->routeIs('register'))
+						<a
+							href="{{ route('login') }}"
+							class="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-700"
+						>
+							Connexion
+						</a>
+					@elseif(request()->routeIs('login'))
+						<a
+							href="{{ route('register') }}"
+							class="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-700"
+						>
+							Créer un compte
+						</a>
+					@else
+						<a
+							href="{{ route('login') }}"
+							class="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-700"
+						>
+							Connexion
+						</a>
+
+						<a
+							href="{{ route('register') }}"
+							class="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-700"
+						>
+							Créer un compte
+						</a>
+					@endif
+				@endauth
+			</nav>
+		</div>
+	</header>
+
+	{{-- Main --}}
+	<main class="min-h-[calc(100vh-9rem)]">
+		<div class="mx-auto flex w-full max-w-7xl justify-center px-4 py-10 sm:px-6 lg:px-8">
+			{{ $slot }}
+		</div>
+	</main>
+
+	{{-- Footer --}}
+	<footer class="border-t border-gray-200 bg-white">
+		<div class="mx-auto flex h-12 max-w-7xl items-center justify-center px-4 text-sm text-gray-500">
+			&copy; {{ date('Y') }} {{ config('app.name') }}
+		</div>
+	</footer>
+
+	@stack('scripts')
+</body>
 </html>

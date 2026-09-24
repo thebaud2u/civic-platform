@@ -25,3 +25,10 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+/htdocs
+/storage/media-library
+npm-debug.log
+yarn-error.log
+/.idea
+_*
+/.ddev
