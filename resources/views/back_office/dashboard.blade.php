@@ -13,10 +13,8 @@
 
 		{{-- Statistics --}}
 		<div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-
 			{{-- Users --}}
 			<div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-
 				<div class="flex items-center justify-between">
 					<div>
 						<p class="text-sm font-medium text-gray-500">

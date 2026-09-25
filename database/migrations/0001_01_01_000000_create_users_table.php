@@ -13,7 +13,7 @@ return new class extends Migration
 	{
 		Schema::create('users', function (Blueprint $table) {
 			$table->id();
-			$table->enum('gender', ['Mr', 'Mrs', 'Non-binairy']);
+			$table->enum('gender', ['mr', 'mme', 'autre']);
 			$table->string('first_name');
 			$table->string('last_name');
 			$table->string('email')->unique();
@@ -23,8 +23,9 @@ return new class extends Migration
 			$table->date('birthday')->nullable();
 			$table->string('phone')->nullable();
 			$table->string('mobile')->nullable();
-			$table->foreignId('service_id')->constrained()->cascadeOnDelete();
-			$table->foreignId('manager_id')->constrained()->cascadeOnDelete();
+			$table->json('values')->nullable();
+			$table->foreignId('service_id')->nullable();
+			$table->foreignId('manager_id')->nullable()->constrained('users')->nullOnDelete();
 			$table->timestamp('last_logon')->nullable();
 			$table->timestamps();
 			$table->softDeletes();

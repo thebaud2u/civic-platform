@@ -11,7 +11,7 @@ class RolesAndPermissionsSeeder extends Seeder
 	public function run(): void
 	{
 		Role::create(['name' => 'agent', 'guard_name' => 'web']);
-		Role::create(['name' => 'manager', 'guard_name' => 'web']);
+		Role::create(['name' => 'chef de service', 'guard_name' => 'web']);
 		Role::create(['name' => 'admin', 'guard_name' => 'admin']);
 
 		Permission::create(['name' => 'dayOff.read']);
@@ -20,7 +20,7 @@ class RolesAndPermissionsSeeder extends Seeder
 		Permission::create(['name' => 'dayOff.delete']);
 
 		$agent = Role::findByName('agent');
-		$manager = Role::findByName('manager');
+		$manager = Role::findByName('chef de service');
 
 		$agent->givePermissionTo([
 			'dayOff.read',

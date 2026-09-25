@@ -33,14 +33,12 @@
 						Dashboard
 					</a>
 				@else
-					@if(request()->routeIs('register'))
-						<a
-							href="{{ route('login') }}"
-							class="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-700"
-						>
-							Connexion
-						</a>
-					@endif
+					<a
+						href="{{ route('back-office.index') }}"
+						class="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-700"
+					>
+						Back office
+					</a>
 				@endauth
 			</nav>
 		</div>
