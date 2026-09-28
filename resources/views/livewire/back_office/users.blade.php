@@ -4,14 +4,9 @@
 			Gérez les comptes des agents et chefs de service
 		</div>
 
-		<button
-			type="button"
-			x-data
-			x-on:click="$dispatch('open-modal', 'user-form')"
-			class="inline-flex items-center justify-end gap-2 rounded-md bg-primary-700 px-4 py-2.5
-				text-sm font-medium text-white shadow-sm transition
-				hover:opacity-90
-				focus:outline-none focus:ring-2 focus:ring-primary-700 focus:ring-offset-2"
+		<x-primary-button
+			wire:click="fresh"
+			x-on:click.prevent="$dispatch('open-modal', 'user-form');"
 		>
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
@@ -20,6 +15,7 @@
 				stroke-width="1.5"
 				stroke="currentColor"
 				class="h-5 w-5"
+				aria-hidden="true"
 			>
 				<path
 					stroke-linecap="round"
@@ -29,7 +25,7 @@
 			</svg>
 
 			Créer un utilisateur
-		</button>
+		</x-primary-button>
 	</div>
 
 	{{-- Filtres --}}
@@ -37,75 +33,58 @@
 		<div class="flex flex-col gap-4 sm:flex-row sm:items-end">
 			{{-- Role --}}
 			<div class="w-full sm:w-auto sm:min-w-52">
-				<label for="role-filters" class="mb-1.5 block text-sm font-medium text-gray-700">
-					Rôle
-				</label>
-
-				<select
+				<x-input-label for="role-filters" value="Rôle" />
+				<x-select-input
 					id="role-filters"
-					wire:model.live="role"
-					class="block w-full rounded-md border-gray-300 text-sm shadow-sm
-						   focus:border-primary-700 focus:ring-primary-700"
+					wire:model="role"
+					class="mt-1 block w-full"
 				>
 					<option value="">Tous les rôles</option>
-
 					@foreach($roles as $roleFiltersEntry)
 						<option value="{{ $roleFiltersEntry->id }}">
 							{{ ucfirst($roleFiltersEntry->name) }}
 						</option>
 					@endforeach
-				</select>
+				</x-select-input>
 			</div>
 
 			{{-- Service --}}
 			<div class="w-full sm:w-auto sm:min-w-52">
-				<label for="service-filters" class="mb-1.5 block text-sm font-medium text-gray-700">
-					Service
-				</label>
-
-				<select
+				<x-input-label for="service-filters" value="Service" />
+				<x-select-input
 					id="service-filters"
-					wire:model.live="service"
-					class="block w-full rounded-md border-gray-300 text-sm shadow-sm
-						   focus:border-primary-700 focus:ring-primary-700"
+					wire:model="service"
+					class="mt-1 block w-full"
 				>
 					<option value="">Tous les services</option>
-
 					@foreach($services as $serviceFiltersEntry)
 						<option value="{{ $serviceFiltersEntry->slug }}">
-							{{ ucfirst($serviceFiltersEntry->name) }}
+							{{ $serviceFiltersEntry->name }}
 						</option>
 					@endforeach
-				</select>
+				</x-select-input>
 			</div>
 
 			{{-- Manager --}}
 			<div class="w-full sm:w-auto sm:min-w-52">
-				<label for="manager-filters" class="mb-1.5 block text-sm font-medium text-gray-700">
-					Manager
-				</label>
-
-				<select
+				<x-input-label for="manager-filters" value="Chef de service" />
+				<x-select-input
 					id="manager-filters"
-					wire:model.live="manager"
-					class="block w-full rounded-md border-gray-300 text-sm shadow-sm
-						   focus:border-primary-700 focus:ring-primary-700"
+					wire:model="manager"
+					class="mt-1 block w-full"
 				>
 					<option value="">Tous les chefs de service</option>
-
-					@foreach($roles as $managerFiltersEntry)
+					@foreach($managers as $managerFiltersEntry)
 						<option value="{{ $managerFiltersEntry->slug }}">
-							{{ ucfirst($managerFiltersEntry->name) }}
+							{{ $managerFiltersEntry->full_name }}
 						</option>
 					@endforeach
-				</select>
+				</x-select-input>
 			</div>
 
-			{{-- Recherche --}}
+			{{-- Search --}}
 			<div class="w-full sm:flex-1">
-				<label for="keyword" class="mb-1.5 block text-sm font-medium text-gray-700">
-					Recherche
-				</label>
+				<x-input-label for="keyword" value="Recherche" />
 
 				<div class="relative">
 					<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
@@ -116,6 +95,7 @@
 							stroke-width="1.5"
 							stroke="currentColor"
 							class="h-5 w-5"
+							aria-hidden="true"
 						>
 							<path
 								stroke-linecap="round"
@@ -125,24 +105,24 @@
 						</svg>
 					</div>
 
-					<input
-						type="text"
-						wire:model.live="keyword"
-						name="keyword"
+					<x-text-input
 						id="keyword"
+						type="search"
+						wire:model="keyword"
+						class="mt-1 block w-full py-2.5 pl-10"
 						placeholder="Nom, email, identifiant..."
-						class="block w-full rounded-md border-gray-300 py-2.5 pl-10 text-sm shadow-sm
-							   focus:border-primary-700 focus:ring-primary-700"
 					/>
 				</div>
 			</div>
 		</div>
 	</div>
 
-	{{-- Tableau --}}
+	{{-- Table --}}
 	<div class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
 		<div class="overflow-x-auto">
 			<table class="w-full min-w-[900px]">
+				<caption class="sr-only">Liste des utilisateurs</caption>
+
 				<thead class="bg-gray-50">
 					<tr>
 						<th scope="col"
@@ -179,17 +159,24 @@
 
 				<tbody class="divide-y divide-gray-200">
 					@forelse($users as $userEntry)
+						@php
+							$toggleLabel = ($userEntry->trashed() ? 'Activer' : 'Désactiver').' le compte de '.$userEntry->full_name;
+						@endphp
+
 						<tr class="transition-colors hover:bg-gray-50">
-							{{-- Utilisateur --}}
+							{{-- User --}}
 							<td class="px-6 py-4">
 								<div class="flex items-center gap-3">
-									<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-sm font-semibold text-gray-600">
+									<div
+										class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-sm font-semibold text-gray-600"
+										aria-hidden="true"
+									>
 										{{ strtoupper(substr($userEntry->first_name, 0, 1) . substr($userEntry->last_name, 0, 1)) }}
 									</div>
 
 									<div class="min-w-0">
 										<div class="truncate text-sm font-medium text-gray-900">
-											{{ $userEntry->fullName }}
+											{{ $userEntry->full_name }}
 										</div>
 
 										<div class="truncate text-sm text-gray-500">
@@ -199,7 +186,7 @@
 								</div>
 							</td>
 
-							{{-- Rôle --}}
+							{{-- Role --}}
 							<td class="px-6 py-4">
 								@if($userEntry->roles->isNotEmpty())
 									@if($userEntry->hasRole('agent'))
@@ -225,10 +212,10 @@
 
 							{{-- Manager --}}
 							<td class="px-6 py-4 text-sm text-gray-700">
-								{{ $userEntry->manager?->fullName() ?? '—' }}
+								{{ $userEntry->manager?->full_name ?? '—' }}
 							</td>
 
-							{{-- Dernière connexion --}}
+							{{-- Last connection --}}
 							<td class="px-6 py-4 text-sm text-gray-500">
 								{{ $userEntry->last_logon?->format('d/m/Y H:i') ?? 'Jamais' }}
 							</td>
@@ -236,14 +223,12 @@
 							{{-- Actions --}}
 							<td class="px-6 py-4">
 								<div class="flex justify-end gap-2">
-									<button
-										type="button"
+									{{-- Update user --}}
+									<x-action-button
 										wire:click="getUser('{{ $userEntry->slug }}', 'user-form')"
-										title="Modifier le service"
-										class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-gray-300
-											   bg-white text-gray-600 transition
-											   hover:bg-gray-50 hover:text-gray-900
-											   focus:outline-none focus:ring-2 focus:ring-primary-700 focus:ring-offset-1"
+										title="Modifier l'utilisateur {{ $userEntry->full_name }}"
+										aria-label="Modifier l'utilisateur {{ $userEntry->full_name }}"
+										class="bg-primary-700 text-white focus:ring-primary-700"
 									>
 										<svg
 											xmlns="http://www.w3.org/2000/svg"
@@ -252,6 +237,7 @@
 											stroke-width="1.5"
 											stroke="currentColor"
 											class="h-5 w-5"
+											aria-hidden="true"
 										>
 											<path
 												stroke-linecap="round"
@@ -259,17 +245,14 @@
 												d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"
 											/>
 										</svg>
-									</button>
+									</x-action-button>
 
 									{{-- Reset password --}}
-									<button
-										type="button"
-										wire:click="getUser({{ $userEntry->slug }}, 'reset-password')"
-										title="Réinitialiser le mot de passe"
-										class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-gray-300
-											   bg-white text-gray-600 transition
-											   hover:bg-gray-50 hover:text-gray-900
-											   focus:outline-none focus:ring-2 focus:ring-primary-700 focus:ring-offset-1"
+									<x-action-button
+										wire:click="getUser('{{ $userEntry->slug }}', 'reset-password')"
+										title="Réinitialiser le mot de passe de {{ $userEntry->full_name }}"
+										aria-label="Réinitialiser le mot de passe de {{ $userEntry->full_name }}"
+										class="bg-primary-700 text-white focus:ring-primary-700"
 									>
 										<svg
 											xmlns="http://www.w3.org/2000/svg"
@@ -278,6 +261,7 @@
 											stroke-width="1.5"
 											stroke="currentColor"
 											class="h-5 w-5"
+											aria-hidden="true"
 										>
 											<path
 												stroke-linecap="round"
@@ -285,19 +269,14 @@
 												d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"
 											/>
 										</svg>
-									</button>
+									</x-action-button>
 
 									{{-- Activer / désactiver --}}
-									<button
-										type="button"
-										wire:click="getUser({{ $userEntry->slug }}, 'toggle-account')"
-										title="{{ !$userEntry->trashed() ? 'Désactiver le compte' : 'Activer le compte' }}"
-										class="inline-flex h-9 w-9 items-center justify-center rounded-md border transition
-											   focus:outline-none focus:ring-2 focus:ring-offset-1
-											   {{ $userEntry->trashed()
-													? 'border-green-200 bg-green-50 text-green-600 hover:bg-green-100 focus:ring-green-500'
-													: 'border-red-200 bg-red-50 text-red-600 hover:bg-red-100 focus:ring-red-500'
-											   }}"
+									<x-action-button
+										wire:click="getUser('{{ $userEntry->slug }}', 'toggle-account')"
+										title="{{ $toggleLabel }}"
+										aria-label="{{ $toggleLabel }}"
+										class="bg-primary-700 text-white focus:ring-primary-700"
 									>
 										@if(!$userEntry->trashed())
 											<svg
@@ -307,6 +286,7 @@
 												stroke-width="1.5"
 												stroke="currentColor"
 												class="h-5 w-5"
+												aria-hidden="true"
 											>
 												<path
 													stroke-linecap="round"
@@ -320,9 +300,9 @@
 												fill="none"
 												viewBox="0 0 24 24"
 												stroke-width="1.5"
-												viewBox="0 0 24 24"
 												stroke="currentColor"
 												class="h-5 w-5"
+												aria-hidden="true"
 											>
 												<path
 													stroke-linecap="round"
@@ -331,7 +311,7 @@
 												/>
 											</svg>
 										@endif
-									</button>
+									</x-action-button>
 								</div>
 							</td>
 						</tr>
@@ -346,6 +326,7 @@
 										stroke-width="1.5"
 										stroke="currentColor"
 										class="mb-3 h-10 w-10 text-gray-300"
+										aria-hidden="true"
 									>
 										<path
 											stroke-linecap="round"
@@ -377,187 +358,146 @@
 		</div>
 	@endif
 
+	{{-- Modal user form --}}
 	<x-modal
 		name="user-form"
-		:class="'w-full max-w-2xl'"
+		labelledby="user-form-title"
 		focusable
 	>
 		<section class="p-6 sm:p-8">
 			<header>
-				<h2 class="text-lg font-semibold text-gray-900">
+				<h2 id="user-form-title" class="text-lg font-semibold text-gray-900">
 					{{ $user->exists ? 'Modifier l\'utilisateur' : 'Créer un utilisateur' }}
 				</h2>
 			</header>
 
 			<form wire:submit.prevent="userForm" class="flex flex-col mt-6 space-y-5">
 				{{-- Civilité --}}
-				<div>
-					<span class="block text-sm font-medium text-gray-700">
+				<fieldset @if($errors->has('gender')) aria-describedby="gender-error" @endif>
+					<legend class="block font-medium text-sm text-gray-700">
 						Civilité
-					</span>
+						<span class="text-danger-600" aria-hidden="true">*</span>
+					</legend>
 
 					<div class="mt-2 flex items-center gap-6">
-						<label class="inline-flex items-center gap-2">
-							<input
-								type="radio"
-								name="gender"
-								value="mr"
-								wire:model="gender"
-								class="border-gray-300 text-mnw-deepblue
-									focus:ring-mnw-deepblue"
-							>
-							<span class="text-sm text-gray-700">Mr</span>
-						</label>
-
-						<label class="inline-flex items-center gap-2">
-							<input
-								type="radio"
-								name="gender"
-								value="mme"
-								wire:model="gender"
-								class="border-gray-300 text-mnw-deepblue
-									focus:ring-mnw-deepblue"
-							>
-							<span class="text-sm text-gray-700">Mme</span>
-						</label>
-
-						<label class="inline-flex items-center gap-2">
-							<input
-								type="radio"
-								name="gender"
-								value="autre"
-								wire:model="gender"
-								class="border-gray-300 text-mnw-deepblue
-									focus:ring-mnw-deepblue"
-							>
-							<span class="text-sm text-gray-700">Autre</span>
-						</label>
+						@foreach(['mr' => 'Mr', 'mme' => 'Mme', 'autre' => 'Autre'] as $value => $label)
+							<label class="inline-flex items-center gap-2">
+								<input
+									type="radio"
+									name="gender"
+									value="{{ $value }}"
+									wire:model="gender"
+									class="border-gray-300 text-primary-700 focus:ring-primary-700"
+								>
+								<span class="text-sm text-gray-700">
+									{{ $label }}
+								</span>
+							</label>
+						@endforeach
 					</div>
 
-					@error('gender')
-						<p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-					@enderror
-				</div>
+					<x-input-error id="gender-error" :messages="$errors->get('gender')" class="mt-1" />
+				</fieldset>
 
-				{{-- Name --}}
+				{{-- Prénom --}}
 				<div>
-					<label for="first-name" class="block text-sm font-medium text-gray-700">
-						Prénom
-					</label>
-
-					<input
-						type="text"
+					<x-input-label for="first-name" value="Prénom" :required="true" />
+					<x-text-input
 						id="first-name"
+						type="text"
 						wire:model="firstName"
-						class="mt-1 block w-full rounded-md border-gray-300 shadow-sm
-							focus:border-mnw-deepblue focus:ring-mnw-deepblue"
-					>
-
-					@error('firstName')
-						<p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-					@enderror
+						class="mt-1 block w-full"
+						placeholder="Prénom"
+						aria-required="true"
+						:aria-invalid="$errors->has('firstName') ? 'true' : null"
+						:aria-describedby="$errors->has('firstName') ? 'first-name-error' : null"
+					/>
+					<x-input-error id="first-name-error" :messages="$errors->get('firstName')" class="mt-1" />
 				</div>
 
+				{{-- Nom --}}
 				<div>
-					<label for="last-name" class="block text-sm font-medium text-gray-700">
-						Nom
-					</label>
-
-					<input
-						type="text"
+					<x-input-label for="last-name" value="Nom" :required="true" />
+					<x-text-input
 						id="last-name"
+						type="text"
 						wire:model="lastName"
-						class="mt-1 block w-full rounded-md border-gray-300 shadow-sm
-							focus:border-mnw-deepblue focus:ring-mnw-deepblue"
-					>
-
-					@error('lastName')
-						<p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-					@enderror
+						class="mt-1 block w-full"
+						placeholder="Nom"
+						aria-required="true"
+						:aria-invalid="$errors->has('lastName') ? 'true' : null"
+						:aria-describedby="$errors->has('lastName') ? 'last-name-error' : null"
+					/>
+					<x-input-error id="last-name-error" :messages="$errors->get('lastName')" class="mt-1" />
 				</div>
 
 				{{-- Email --}}
 				<div>
-					<label for="email" class="block text-sm font-medium text-gray-700">
-						Email
-					</label>
-
-					<input
-						type="email"
+					<x-input-label for="email" value="Email" :required="true" />
+					<x-text-input
 						id="email"
+						type="email"
 						wire:model="email"
-						class="mt-1 block w-full rounded-md border-gray-300 shadow-sm
-							focus:border-mnw-deepblue focus:ring-mnw-deepblue"
-					>
-
-					@error('email')
-						<p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-					@enderror
+						class="mt-1 block w-full"
+						placeholder="Email"
+						aria-required="true"
+						:aria-invalid="$errors->has('email') ? 'true' : null"
+						:aria-describedby="$errors->has('email') ? 'email-error' : null"
+					/>
+					<x-input-error id="email-error" :messages="$errors->get('email')" class="mt-1" />
 				</div>
 
 				{{-- Date de naissance --}}
 				<div>
-					<label for="birthday" class="block text-sm font-medium text-gray-700">
-						Date de naissance
-					</label>
-
-					<input
-						type="date"
+					<x-input-label for="birthday" value="Date de naissance" />
+					<x-text-input
 						id="birthday"
+						type="date"
 						wire:model="birthday"
-						class="mt-1 block w-full rounded-md border-gray-300 shadow-sm
-							focus:border-mnw-deepblue focus:ring-mnw-deepblue"
-					>
-
-					@error('birthday')
-						<p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-					@enderror
+						class="mt-1 block w-full"
+						:aria-invalid="$errors->has('birthday') ? 'true' : null"
+						:aria-describedby="$errors->has('birthday') ? 'birthday-error' : null"
+					/>
+					<x-input-error id="birthday-error" :messages="$errors->get('birthday')" class="mt-1" />
 				</div>
 
-				{{-- Téléphone / Mobile --}}
+				{{-- Téléphone / Téléphone portable --}}
 				<div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
 					<div>
-						<label for="phone" class="block text-sm font-medium text-gray-700">
-							Téléphone
-						</label>
-
-						<input
-							type="tel"
+						<x-input-label for="phone" value="Téléphone" />
+						<x-text-input
 							id="phone"
+							type="tel"
 							wire:model="phone"
-							class="mt-1 block w-full rounded-md border-gray-300 shadow-sm
-								focus:border-mnw-deepblue focus:ring-mnw-deepblue"
-						>
-
-						@error('phone')
-							<p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-						@enderror
+							class="mt-1 block w-full"
+							placeholder="Téléphone"
+							:aria-invalid="$errors->has('phone') ? 'true' : null"
+							:aria-describedby="$errors->has('phone') ? 'phone-error' : null"
+						/>
+						<x-input-error id="phone-error" :messages="$errors->get('phone')" class="mt-1" />
 					</div>
 
 					<div>
-						<label for="mobile" class="block text-sm font-medium text-gray-700">
-							Mobile
-						</label>
-
-						<input
-							type="tel"
+						<x-input-label for="mobile" value="Téléphone portable" />
+						<x-text-input
 							id="mobile"
+							type="tel"
 							wire:model="mobile"
-							class="mt-1 block w-full rounded-md border-gray-300 shadow-sm
-								focus:border-mnw-deepblue focus:ring-mnw-deepblue"
-						>
-
-						@error('mobile')
-							<p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-						@enderror
+							class="mt-1 block w-full"
+							placeholder="Téléphone portable"
+							:aria-invalid="$errors->has('mobile') ? 'true' : null"
+							:aria-describedby="$errors->has('mobile') ? 'mobile-error' : null"
+						/>
+						<x-input-error id="mobile-error" :messages="$errors->get('mobile')" class="mt-1" />
 					</div>
 				</div>
 
 				{{-- Rôle --}}
-				<div>
-					<span class="block text-sm font-medium text-gray-700">
+				<fieldset @if($errors->has('roleSelected')) aria-describedby="role-error" @endif>
+					<legend class="block font-medium text-sm text-gray-700">
 						Rôle
-					</span>
+						<span class="text-danger-600" aria-hidden="true">*</span>
+					</legend>
 
 					<div class="mt-2 flex items-center gap-6">
 						@foreach($roles as $roleFormEntry)
@@ -567,83 +507,72 @@
 									name="role"
 									value="{{ $roleFormEntry->name }}"
 									wire:model="roleSelected"
-									class="border-gray-300 text-mnw-deepblue
-										focus:ring-mnw-deepblue"
+									class="border-gray-300 text-primary-700 focus:ring-primary-700"
 								>
-								<span class="text-sm text-gray-700">{{ ucfirst($roleFormEntry->name) }}</span>
+								<span class="text-sm text-gray-700">
+									{{ ucfirst($roleFormEntry->name) }}
+								</span>
 							</label>
 						@endforeach
 					</div>
 
-					@error('roleSelected')
-						<p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-					@enderror
-				</div>
+					@if($isUserManagerOfAService)
+						<div class="mt-2 text-sm text-gray-400">
+							{{ $user->full_name }} est chef de service pour un ou plusieurs services.
+							Changer son rôle le supprimera des services auxquels {{ $user->gender == 'mr' ? 'il est associé' : 'elle est associée' }}.
+						</div>
+					@endif
+
+					<x-input-error id="role-error" :messages="$errors->get('roleSelected')" class="mt-1" />
+				</fieldset>
 
 				{{-- Service --}}
 				<div>
-					<label for="service" class="block text-sm font-medium text-gray-700">
-						Service
-					</label>
-
-					<select
+					<x-input-label for="service" value="Service" />
+					<x-select-input
 						id="service"
 						wire:model="serviceSelected"
-						class="mt-1 block w-full rounded-md border-gray-300 shadow-sm
-							focus:border-mnw-deepblue focus:ring-mnw-deepblue"
+						class="mt-1 block w-full"
+						:aria-invalid="$errors->has('serviceSelected') ? 'true' : null"
+						:aria-describedby="$errors->has('serviceSelected') ? 'service-error' : null"
 					>
 						<option value="">Aucun service</option>
-
 						@foreach($services as $serviceFormEntry)
 							<option value="{{ $serviceFormEntry->slug }}">
 								{{ $serviceFormEntry->name }}
 							</option>
 						@endforeach
-					</select>
-
-					@error('service_id')
-						<p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-					@enderror
+					</x-select-input>
+					<x-input-error id="service-error" :messages="$errors->get('serviceSelected')" class="mt-1" />
 				</div>
 
 				{{-- Manager --}}
 				<div>
-					<label for="manager" class="block text-sm font-medium text-gray-700">
-						Chef de service
-					</label>
-
-					<select
+					<x-input-label for="manager" value="Chef de service" />
+					<x-select-input
 						id="manager"
 						wire:model="managerSelected"
-						class="mt-1 block w-full rounded-md border-gray-300 shadow-sm
-							focus:border-mnw-deepblue focus:ring-mnw-deepblue"
+						class="mt-1 block w-full"
+						:aria-invalid="$errors->has('managerSelected') ? 'true' : null"
+						:aria-describedby="$errors->has('managerSelected') ? 'manager-error' : null"
 					>
 						<option value="">Aucun chef de service</option>
-
 						@foreach($managers as $managerFormEntry)
 							<option value="{{ $managerFormEntry->slug }}">
-								{{ $managerFormEntry->name }}
+								{{ $managerFormEntry->full_name }}
 							</option>
 						@endforeach
-					</select>
-
-					@error('managerSelected')
-						<p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-					@enderror
+					</x-select-input>
+					<x-input-error id="manager-error" :messages="$errors->get('managerSelected')" class="mt-1" />
 				</div>
 
 				{{-- Boutons --}}
 				<div class="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
-					<x-secondary-button
-						type="button"
-						x-on:click="$dispatch('close')"
-					>
-						Annuler
-					</x-secondary-button>
+					<x-cancel-button />
 
-					<x-primary-button type="submit" @user-form-complete.window="$dispatch('close')">
+					<x-validate-button @user-form-complete.window="$dispatch('close')">
 						{{ $user->exists ? 'Modifier l\'utilisateur' : 'Créer l\'utilisateur' }}
-					</x-primary-button>
+					</x-validate-button>
 				</div>
 			</form>
 		</section>
@@ -652,12 +581,12 @@
 	{{-- Modal désactivation / activation --}}
 	<x-modal
 		name="toggle-account"
-		:class="'w-full max-w-lg'"
+		labelledby="toggle-account-title"
 		focusable
 	>
 		<section class="p-6 sm:p-8">
 			<header>
-				<h2 class="text-lg font-semibold text-gray-900">
+				<h2 id="toggle-account-title" class="text-lg font-semibold text-gray-900">
 					{{ $switchState }} ?
 				</h2>
 
@@ -666,30 +595,27 @@
 				</p>
 			</header>
 
-			<div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-				<x-secondary-button x-on:click="$dispatch('close');">
-					Annuler
-				</x-secondary-button>
+			<form wire:submit.prevent="toggleUser">
+				<div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+					<x-cancel-button />
 
-				<x-primary-button
-					wire:click="toggleUser"
-					@account-toggled.window="$dispatch('close');"
-				>
-					{{ $switchState }}
-				</x-primary-button>
-			</div>
+					<x-validate-button @account-toggled.window="$dispatch('close');">
+						{{ $switchState }}
+					</x-validate-button>
+				</div>
+			</form>
 		</section>
 	</x-modal>
 
 	{{-- Modal reset password --}}
 	<x-modal
 		name="reset-password"
-		:class="'w-full max-w-lg'"
+		labelledby="reset-password-title"
 		focusable
 	>
 		<section class="p-6 sm:p-8">
 			<header>
-				<h2 class="text-lg font-semibold text-gray-900">
+				<h2 id="reset-password-title" class="text-lg font-semibold text-gray-900">
 					Réinitialiser le mot de passe ?
 				</h2>
 
@@ -698,18 +624,15 @@
 				</p>
 			</header>
 
-			<div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-				<x-secondary-button x-on:click="$dispatch('close');">
-					Annuler
-				</x-secondary-button>
+			<form wire:submit.prevent="resetPassword">
+				<div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+					<x-cancel-button />
 
-				<x-primary-button
-					wire:click="resetPassword"
-					@password-changed.window="$dispatch('close');"
-				>
-					Réinitialiser
-				</x-primary-button>
-			</div>
+					<x-validate-button @password-changed.window="$dispatch('close');">
+						Réinitialiser
+					</x-validate-button>
+				</div>
+			</form>
 		</section>
 	</x-modal>
 </div>

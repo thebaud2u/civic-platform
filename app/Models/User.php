@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Casts\AsCollection;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -82,8 +83,8 @@ class User extends Authenticatable
 		return $this->belongsTo(User::class, 'manager_id');
 	}
 
-	public function service(): BelongsTo
+	public function managedService(): HasOne
 	{
-		return $this->belongsTo(Service::class);
+		return $this->hasOne(Service::class, 'manager_id');
 	}
 }

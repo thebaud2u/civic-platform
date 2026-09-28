@@ -26,18 +26,16 @@
 			{{-- Navigation --}}
 			<nav class="flex items-center gap-3">
 				@auth
-					<a
-						href="{{ route('/dashboard') }}"
-						class="rounded-md px-3 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-100 hover:text-gray-900"
-					>
-						Dashboard
+					<a href="{{ route('/dashboard') }}">
+						<x-primary-button>
+							Dashboard
+						</x-primary-button>
 					</a>
 				@else
-					<a
-						href="{{ route('back-office.index') }}"
-						class="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-700"
-					>
-						Back office
+					<a href="{{ route('back-office.index') }}">
+						<x-primary-button>
+							Back office
+						</x-primary-button>
 					</a>
 				@endauth
 			</nav>

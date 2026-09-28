@@ -13,8 +13,8 @@ return new class extends Migration
 	{
 		Schema::create('services', function (Blueprint $table) {
 			$table->id();
-			$table->string('name')->unique();
-			$table->text('description')->nullable();
+			$table->string('name', 50)->unique();
+			$table->string('description')->nullable();
 			$table->string('slug');
 			$table->foreignId('manager_id')->nullable()->constrained('users')->nullOnDelete();
 			$table->timestamps();

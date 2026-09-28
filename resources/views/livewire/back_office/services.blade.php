@@ -4,14 +4,9 @@
 			Gérer les services de la mairie
 		</div>
 
-		<button
-			type="button"
-			x-data
-			x-on:click="$dispatch('open-modal', 'service-form')"
-			class="inline-flex items-center justify-end gap-2 rounded-md bg-primary-700 px-4 py-2.5
-				text-sm font-medium text-white shadow-sm transition
-				hover:opacity-90
-				focus:outline-none focus:ring-2 focus:ring-primary-700 focus:ring-offset-2"
+		<x-primary-button
+			wire:click="fresh"
+			x-on:click.prevent="$dispatch('open-modal', 'service-form');"
 		>
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
@@ -20,6 +15,7 @@
 				stroke-width="1.5"
 				stroke="currentColor"
 				class="h-5 w-5"
+				aria-hidden="true"
 			>
 				<path
 					stroke-linecap="round"
@@ -29,39 +25,32 @@
 			</svg>
 
 			Créer un service
-		</button>
+		</x-primary-button>
 	</div>
 
 	{{-- Filtres --}}
 	<div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
 		<div class="flex flex-col gap-4 sm:flex-row sm:items-end">
-			{{-- Rôle --}}
+			{{-- Manager --}}
 			<div class="w-full sm:w-auto sm:min-w-52">
-				<label for="manager-filter" class="mb-1.5 block text-sm font-medium text-gray-700">
-					Chef de service
-				</label>
-
-				<select
+				<x-input-label for="manager-filter" value="Chef de service" />
+				<x-select-input
 					id="manager-filter"
-					wire:model.live="manager"
-					class="block w-full rounded-md border-gray-300 text-sm shadow-sm
-						   focus:border-primary-700 focus:ring-primary-700"
+					wire:model="manager"
+					class="mt-1 block w-full"
 				>
 					<option value="">Tous les chefs de service</option>
-
 					@foreach($managers as $managerFilterEntry)
 						<option value="{{ $managerFilterEntry->slug }}">
-							{{ ucfirst($managerFilterEntry->name) }}
+							{{ $managerFilterEntry->full_name }}
 						</option>
 					@endforeach
-				</select>
+				</x-select-input>
 			</div>
 
-			{{-- Recherche --}}
+			{{-- Search --}}
 			<div class="w-full sm:flex-1">
-				<label for="keyword" class="mb-1.5 block text-sm font-medium text-gray-700">
-					Recherche
-				</label>
+				<x-input-label for="keyword" value="Recherche" />
 
 				<div class="relative">
 					<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
@@ -72,6 +61,7 @@
 							stroke-width="1.5"
 							stroke="currentColor"
 							class="h-5 w-5"
+							aria-hidden="true"
 						>
 							<path
 								stroke-linecap="round"
@@ -81,24 +71,24 @@
 						</svg>
 					</div>
 
-					<input
-						type="text"
-						wire:model.live="keyword"
-						name="keyword"
+					<x-text-input
 						id="keyword"
+						type="search"
+						wire:model="keyword"
+						class="mt-1 block w-full py-2.5 pl-10"
 						placeholder="Nom, chef de service..."
-						class="block w-full rounded-md border-gray-300 py-2.5 pl-10 text-sm shadow-sm
-							   focus:border-primary-700 focus:ring-primary-700"
 					/>
 				</div>
 			</div>
 		</div>
 	</div>
 
-	{{-- Tableau --}}
+	{{-- Table --}}
 	<div class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
 		<div class="overflow-x-auto">
 			<table class="w-full min-w-[900px]">
+				<caption class="sr-only">Liste des services</caption>
+
 				<thead class="bg-gray-50">
 					<tr>
 						<th scope="col"
@@ -121,29 +111,25 @@
 				<tbody class="divide-y divide-gray-200">
 					@forelse($services as $serviceEntry)
 						<tr class="transition-colors hover:bg-gray-50">
-							{{-- Utilisateur --}}
+							{{-- Name --}}
 							<td class="px-6 py-4">
-								<div class="flex items-center gap-3">
-									{{ $serviceEntry->name }}
-								</div>
+								{{ $serviceEntry->name }}
 							</td>
 
 							{{-- Manager --}}
 							<td class="px-6 py-4 text-sm text-gray-700">
-								{{ $serviceEntry->manager?->fullName() ?? '—' }}
+								{{ $serviceEntry->manager?->full_name ?? '—' }}
 							</td>
 
 							{{-- Actions --}}
 							<td class="px-6 py-4">
 								<div class="flex justify-end gap-2">
-									<button
-										type="button"
+									{{-- Update service --}}
+									<x-action-button
 										wire:click="getService('{{ $serviceEntry->slug }}', 'service-form')"
-										title="Modifier le service"
-										class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-gray-300
-											   bg-white text-gray-600 transition
-											   hover:bg-gray-50 hover:text-gray-900
-											   focus:outline-none focus:ring-2 focus:ring-primary-700 focus:ring-offset-1"
+										title="Modifier le service {{ $serviceEntry->name }}"
+										aria-label="Modifier le service {{ $serviceEntry->name }}"
+										class="bg-primary-700 text-white focus:ring-primary-700"
 									>
 										<svg
 											xmlns="http://www.w3.org/2000/svg"
@@ -152,6 +138,7 @@
 											stroke-width="1.5"
 											stroke="currentColor"
 											class="h-5 w-5"
+											aria-hidden="true"
 										>
 											<path
 												stroke-linecap="round"
@@ -159,13 +146,37 @@
 												d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"
 											/>
 										</svg>
-									</button>
+									</x-action-button>
+
+									{{-- Delete service --}}
+									<x-action-button
+										wire:click="getService('{{ $serviceEntry->slug }}', 'delete-form')"
+										title="Supprimer le service {{ $serviceEntry->name }}"
+										aria-label="Supprimer le service {{ $serviceEntry->name }}"
+										class="bg-danger-700 text-white focus:ring-danger-700"
+									>
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke-width="1.5"
+											stroke="currentColor"
+											class="h-5 w-5"
+											aria-hidden="true"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
+											/>
+										</svg>
+									</x-action-button>
 								</div>
 							</td>
 						</tr>
 					@empty
 						<tr>
-							<td colspan="6" class="px-6 py-12 text-center">
+							<td colspan="3" class="px-6 py-12 text-center">
 								<div class="flex flex-col items-center justify-center">
 									<svg
 										xmlns="http://www.w3.org/2000/svg"
@@ -174,6 +185,7 @@
 										stroke-width="1.5"
 										stroke="currentColor"
 										class="mb-3 h-10 w-10 text-gray-300"
+										aria-hidden="true"
 									>
 										<path
 											stroke-linecap="round"
@@ -205,14 +217,15 @@
 		</div>
 	@endif
 
+	{{-- Modal service form --}}
 	<x-modal
 		name="service-form"
-		:class="'w-full max-w-2xl'"
+		labelledby="service-form-title"
 		focusable
 	>
 		<section class="p-6 sm:p-8">
 			<header>
-				<h2 class="text-lg font-semibold text-gray-900">
+				<h2 id="service-form-title" class="text-lg font-semibold text-gray-900">
 					{{ $service->exists ? 'Modifier le service' : 'Créer un service' }}
 				</h2>
 			</header>
@@ -220,79 +233,87 @@
 			<form wire:submit.prevent="serviceForm" class="flex flex-col mt-6 space-y-5">
 				{{-- Name --}}
 				<div>
-					<label for="name" class="block text-sm font-medium text-gray-700">
-						Libellé du service
-					</label>
-
-					<input
-						type="text"
+					<x-input-label for="name" value="Libellé du service" :required="true" />
+					<x-text-input
 						id="name"
+						type="text"
 						wire:model="name"
-						class="mt-1 block w-full rounded-md border-gray-300 shadow-sm
-							focus:border-mnw-deepblue focus:ring-mnw-deepblue"
-					>
-
-					@error('name')
-						<p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-					@enderror
+						class="mt-1 block w-full"
+						placeholder="Libellé du service"
+						aria-required="true"
+						:aria-invalid="$errors->has('name') ? 'true' : null"
+						:aria-describedby="$errors->has('name') ? 'name-error' : null"
+					/>
+					<x-input-error id="name-error" :messages="$errors->get('name')" class="mt-1" />
 				</div>
 
+				{{-- Description --}}
 				<div>
-					<label for="description" class="block text-sm font-medium text-gray-700">
-						Description
-					</label>
-
-					<input
-						type="text"
+					<x-input-label for="description" value="Description du service" />
+					<x-text-input
 						id="description"
+						type="text"
 						wire:model="description"
-						class="mt-1 block w-full rounded-md border-gray-300 shadow-sm
-							focus:border-mnw-deepblue focus:ring-mnw-deepblue"
-					>
-
-					@error('description')
-						<p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-					@enderror
+						class="mt-1 block w-full"
+						placeholder="Description du service"
+						:aria-invalid="$errors->has('description') ? 'true' : null"
+						:aria-describedby="$errors->has('description') ? 'description-error' : null"
+					/>
+					<x-input-error id="description-error" :messages="$errors->get('description')" class="mt-1" />
 				</div>
 
 				{{-- Manager --}}
 				<div>
-					<label for="manager" class="block text-sm font-medium text-gray-700">
-						Chef de service
-					</label>
-
-					<select
+					<x-input-label for="manager" value="Chef du service" />
+					<x-select-input
 						id="manager"
 						wire:model="managerSelected"
-						class="mt-1 block w-full rounded-md border-gray-300 shadow-sm
-							focus:border-mnw-deepblue focus:ring-mnw-deepblue"
+						class="mt-1 block w-full"
+						:aria-invalid="$errors->has('managerSelected') ? 'true' : null"
+						:aria-describedby="$errors->has('managerSelected') ? 'manager-error' : null"
 					>
 						<option value="">Aucun chef de service</option>
-
 						@foreach($managers as $managerFormEntry)
 							<option value="{{ $managerFormEntry->slug }}">
-								{{ $managerFormEntry->name }}
+								{{ $managerFormEntry->full_name }}
 							</option>
 						@endforeach
-					</select>
-
-					@error('managerSelected')
-						<p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-					@enderror
+					</x-select-input>
+					<x-input-error id="manager-error" :messages="$errors->get('managerSelected')" class="mt-1" />
 				</div>
 
 				{{-- Boutons --}}
 				<div class="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
-					<x-secondary-button
-						type="button"
-						x-on:click="$dispatch('close')"
-					>
-						Annuler
-					</x-secondary-button>
+					<x-cancel-button />
 
-					<x-primary-button type="submit" @service-form-complete.window="$dispatch('close')">
+					<x-validate-button @service-form-complete.window="$dispatch('close')">
 						{{ $service->exists ? 'Modifier le service' : 'Créer un service' }}
-					</x-primary-button>
+					</x-validate-button>
+				</div>
+			</form>
+		</section>
+	</x-modal>
+
+	{{-- Modal delete form --}}
+	<x-modal
+		name="delete-form"
+		labelledby="delete-form-title"
+		focusable
+	>
+		<section class="p-6 sm:p-8">
+			<header>
+				<h2 id="delete-form-title" class="text-lg font-semibold text-gray-900">
+					Supprimer le service {{ $service->exists ? $service->name : '' }} ?
+				</h2>
+			</header>
+
+			<form wire:submit.prevent="deleteForm">
+				<div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+					<x-cancel-button />
+
+					<x-validate-button @service-deleted.window="$dispatch('close');">
+						Supprimer le service
+					</x-validate-button>
 				</div>
 			</form>
 		</section>

@@ -5,11 +5,10 @@
 		</div>
 
 		<div class="flex flex-row items-center justify-center gap-x-2">
-			<a
-				href="{{ route('login') }}"
-				class="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-700"
-			>
-				Connexion
+			<a href="{{ route('login') }}">
+				<x-primary-button>
+					Connexion
+				</x-primary-button>
 			</a>
 		</div>
 	</div>

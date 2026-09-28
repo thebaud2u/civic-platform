@@ -29,6 +29,8 @@ class Users extends Component
 	public $managerSelected;
 	public $roleSelected;
 
+	public $isUserManagerOfAService = false;
+
 	// Criterias
 	public $role;
 	public $service;
@@ -36,20 +38,6 @@ class Users extends Component
 	public $keyword;
 
 	public $switchState = '';
-
-	protected function rules() {
-		return [
-			'gender' => [],
-			'email' => [],
-			'firstName' => [],
-			'lastName' => [],
-			'birthday' => [],
-			'phone' => [],
-			'mobile' => [],
-			'serviceSelected' => [],
-			'managerSelected' => [],
-		];
-	}
 
 	public function toggleUser()
 	{
@@ -85,16 +73,20 @@ class Users extends Component
 				else $this->switchState = 'Désactiver le compte';
 			}
 			elseif($modal == 'user-form') {
+				$this->resetValidation();
+
 				$this->gender = $this->user->gender;
 				$this->email = $this->user->email;
 				$this->firstName = $this->user->first_name;
 				$this->lastName = $this->user->last_name;
-				$this->birthday = $this->user->birthday;
+				$this->birthday = $this->user->birthday?->format('Y-m-d');
 				$this->phone = $this->user->phone;
 				$this->mobile = $this->user->mobile;
-				$this->roleSelected = $this->user->getRoleNames()[0];
-				$this->serviceSelected = $this->user->service?->slug;
+				$this->roleSelected = $this->user->getRoleNames()->first();
+				$this->serviceSelected = $this->user->managedService?->slug;
 				$this->managerSelected = $this->user->manager?->slug;
+
+				$this->isUserManagerOfAService = $this->user->managedService()->exists();
 			}
 
 			$this->dispatch('open-modal', $modal);
@@ -153,6 +145,7 @@ class Users extends Component
 		// Create
 		if(!$this->user->exists) {
 			$user = User::create([
+				'gender' => $this->gender,
 				'first_name' => $this->firstName,
 				'last_name' => $this->lastName,
 				'email' => $this->email,
@@ -176,6 +169,7 @@ class Users extends Component
 		}
 		// Update
 		else {
+			$this->user->gender = $this->gender;
 			$this->user->first_name = $this->firstName;
 			$this->user->last_name = $this->lastName;
 			$this->user->email = $this->email;
@@ -190,8 +184,11 @@ class Users extends Component
 				: null;
 			$this->user->save();
 
-			$this->user->roles()->detach();
-			$this->user->assignRole($this->roleSelected);
+			$this->user->syncRoles($this->roleSelected);
+
+			if($this->roleSelected !== 'chef de service') {
+				$this->user->managedService()->update(['manager_id' => null]);
+			}
 		}
 
 		$this->dispatch('user-form-complete');
@@ -202,16 +199,20 @@ class Users extends Component
 	{
 		$this->user = new User;
 		$this->reset([
+			'gender',
 			'firstName',
 			'lastName',
 			'email',
 			'birthday',
 			'phone',
 			'mobile',
+			'roleSelected',
 			'managerSelected',
 			'serviceSelected'
 		]);
+		$this->resetValidation();
 		$this->switchState = '';
+		$this->isUserManagerOfAService = false;
 		$this->dispatch('user-reset');
 	}
 
@@ -224,7 +225,8 @@ class Users extends Component
 	{
 		$users = User::distinct('users.id')
 			->when($this->keyword, function($when) {
-				$when->where('name', 'LIKE', '%'.$this->keyword.'%')
+				$when->where('first_name', 'LIKE', '%'.$this->keyword.'%')
+					->orWhere('last_name', 'LIKE', '%'.$this->keyword.'%')
 					->orWhere('email', 'LIKE', '%'.$this->keyword.'%')
 					->orWhere('id', 'LIKE', '%'.$this->keyword.'%')
 					->orWhere('slug', 'LIKE', '%'.$this->keyword.'%');

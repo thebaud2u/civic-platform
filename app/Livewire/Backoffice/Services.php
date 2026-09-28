@@ -32,10 +32,16 @@ class Services extends Component
 		$service = Service::findBySlug($slug);
 
 		if($service) {
-			$this->service = $service;
-			$this->name = $this->service->name;
-			$this->description = $this->service->description;
-			$this->managerSelected = $this->service->manager?->slug;
+			if($modal == 'service-form' || $modal == 'delete-form') {
+				$this->service = $service;
+
+				if($modal == 'service-form') {
+					$this->resetValidation();
+					$this->name = $this->service->name;
+					$this->description = $this->service->description;
+					$this->managerSelected = $this->service->manager?->slug;
+				}
+			}
 
 			$this->dispatch('open-modal', $modal);
 		}
@@ -44,15 +50,18 @@ class Services extends Component
 	public function serviceForm()
 	{
 	   $rules = [
-			'name' => ['required', 'max:255', 'unique:'.Service::class],
-			'description' => ['nullable', 'string'],
+			'name' => ['required', 'string', 'max:50', 'unique:'.Service::class],
+			'description' => ['nullable', 'string', 'max:255'],
 			'managerSelected' => ['nullable', 'string', 'exists:users,slug'],
 		];
 
 		$messages = [
 			'name.required' => 'Le libellé du service est obligatoire',
 			'name.unique' => 'Un service existe déjà avec ce libellé',
-			'name.max' => 'Le libellé du service ne doit pas dépasser 255 caractères',
+			'name.string' => 'Le libellé du service doit être une chaîne de caractères uniquement',
+			'name.max' => 'Le libellé du service ne doit pas dépasser 50 caractères',
+			'description.max' => 'La description du service ne doit pas dépasser 255 caractères',
+			'description.string' => 'La description du service doit être une chaîne de caractères uniquement',
 			'managerSelected.exists' => 'Le chef de service sélectionné est invalide',
 		];
 
@@ -82,6 +91,15 @@ class Services extends Component
 		$this->fresh();
 	}
 
+	public function deleteForm()
+	{
+		if($this->service->exists) {
+			$this->service->delete();
+
+			$this->dispatch('service-deleted');
+		}
+	}
+
 	public function fresh()
 	{
 		$this->service = new Service;
@@ -90,6 +108,7 @@ class Services extends Component
 			'description',
 			'managerSelected',
 		]);
+		$this->resetValidation();
 		$this->dispatch('service-reset');
 	}
 
