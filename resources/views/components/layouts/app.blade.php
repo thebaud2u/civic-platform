@@ -32,15 +32,17 @@
 
 			{{-- User / Logout --}}
 			<div class="flex items-center gap-4">
-				<div class="min-w-0 max-w-[9rem] text-right sm:max-w-xs">
-					<p class="truncate text-sm font-medium text-gray-900">
-						{{ Auth::guard('web')->user()->fullname }}
-					</p>
+				<a href="{{ route('account.edit') }}">
+					<div class="min-w-0 max-w-[9rem] text-right sm:max-w-xs">
+						<p class="truncate text-sm font-medium text-gray-900">
+							{{ $user->fullname }}
+						</p>
 
-					<p class="truncate text-xs text-gray-500">
-						{{ ucfirst(Auth::guard('web')->user()->roles()->first()?->name ?? '—') }}
-					</p>
-				</div>
+						<p class="truncate text-xs text-gray-500">
+							Mon compte
+						</p>
+					</div>
+				</a>
 
 				<form action="{{ route('logout') }}" method="POST">
 					@csrf

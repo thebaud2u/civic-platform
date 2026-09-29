@@ -29,64 +29,23 @@
 	</div>
 
 	{{-- Filtres --}}
-	<div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-		<div class="flex flex-col gap-4 sm:flex-row sm:items-end">
-			{{-- Role --}}
-			<div class="w-full sm:w-auto sm:min-w-52">
-				<x-input-label for="role-filters" value="Rôle" />
-				<x-select-input
-					id="role-filters"
-					wire:model="role"
-					class="mt-1 block w-full"
-				>
-					<option value="">Tous les rôles</option>
-					@foreach($roles as $roleFiltersEntry)
-						<option value="{{ $roleFiltersEntry->id }}">
-							{{ ucfirst($roleFiltersEntry->name) }}
-						</option>
-					@endforeach
-				</x-select-input>
-			</div>
+	<div class="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+		<div class="mb-4">
+			<h2 class="text-sm font-semibold text-gray-900">
+				Filtrer les utilisateurs
+			</h2>
 
-			{{-- Service --}}
-			<div class="w-full sm:w-auto sm:min-w-52">
-				<x-input-label for="service-filters" value="Service" />
-				<x-select-input
-					id="service-filters"
-					wire:model="service"
-					class="mt-1 block w-full"
-				>
-					<option value="">Tous les services</option>
-					@foreach($services as $serviceFiltersEntry)
-						<option value="{{ $serviceFiltersEntry->slug }}">
-							{{ $serviceFiltersEntry->name }}
-						</option>
-					@endforeach
-				</x-select-input>
-			</div>
+			<p class="mt-1 text-sm text-gray-500">
+				Utilisez les critères ci-dessous pour affiner la liste.
+			</p>
+		</div>
 
-			{{-- Manager --}}
-			<div class="w-full sm:w-auto sm:min-w-52">
-				<x-input-label for="manager-filters" value="Chef de service" />
-				<x-select-input
-					id="manager-filters"
-					wire:model="manager"
-					class="mt-1 block w-full"
-				>
-					<option value="">Tous les chefs de service</option>
-					@foreach($managers as $managerFiltersEntry)
-						<option value="{{ $managerFiltersEntry->slug }}">
-							{{ $managerFiltersEntry->full_name }}
-						</option>
-					@endforeach
-				</x-select-input>
-			</div>
-
+		<div class="space-y-4">
 			{{-- Search --}}
-			<div class="w-full sm:flex-1">
+			<div class="w-full">
 				<x-input-label for="keyword" value="Recherche" />
 
-				<div class="relative">
+				<div class="relative mt-1">
 					<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
@@ -108,10 +67,108 @@
 					<x-text-input
 						id="keyword"
 						type="search"
-						wire:model="keyword"
-						class="mt-1 block w-full py-2.5 pl-10"
+						wire:model.live="keyword"
+						class="block w-full py-2.5 pl-10"
 						placeholder="Nom, email, identifiant..."
 					/>
+				</div>
+			</div>
+
+			{{-- Select filters --}}
+			<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 mt-4">
+				{{-- Role --}}
+				<div>
+					<x-input-label for="role-filters" value="Rôle" />
+
+					<x-select-input
+						id="role-filters"
+						wire:model.live="role"
+						class="mt-1 block w-full"
+					>
+						<option value="">Tous les rôles</option>
+
+						@foreach($roles as $roleFiltersEntry)
+							<option value="{{ $roleFiltersEntry->id }}">
+								{{ ucfirst($roleFiltersEntry->name) }}
+							</option>
+						@endforeach
+					</x-select-input>
+				</div>
+
+				{{-- Service --}}
+				<div>
+					<x-input-label for="service-filters" value="Service" />
+
+					<x-select-input
+						id="service-filters"
+						wire:model.live="service"
+						class="mt-1 block w-full"
+					>
+						<option value="">Tous les services</option>
+
+						@foreach($services as $serviceFiltersEntry)
+							<option value="{{ $serviceFiltersEntry->slug }}">
+								{{ $serviceFiltersEntry->name }}
+							</option>
+						@endforeach
+					</x-select-input>
+				</div>
+
+				{{-- Manager --}}
+				<div>
+					<x-input-label for="manager-filters" value="Chef de service" />
+
+					<x-select-input
+						id="manager-filters"
+						wire:model.live="manager"
+						class="mt-1 block w-full"
+					>
+						<option value="">Tous les chefs de service</option>
+
+						@foreach($managers as $managerFiltersEntry)
+							<option value="{{ $managerFiltersEntry->slug }}">
+								{{ $managerFiltersEntry->full_name }}
+							</option>
+						@endforeach
+					</x-select-input>
+				</div>
+
+				{{-- Contract type --}}
+				<div>
+					<x-input-label for="contract-type-filters" value="Type de contrat" />
+
+					<x-select-input
+						id="contract-type-filters"
+						wire:model.live="contractType"
+						class="mt-1 block w-full"
+					>
+						<option value="">Tous les types de contrat</option>
+
+						@foreach($contractTypes as $contractTypeFiltersEntry)
+							<option value="{{ $contractTypeFiltersEntry->id }}">
+								{{ $contractTypeFiltersEntry->name }}
+							</option>
+						@endforeach
+					</x-select-input>
+				</div>
+
+				{{-- Work schedule --}}
+				<div>
+					<x-input-label for="work-schedule-filters" value="Régime de travail" />
+
+					<x-select-input
+						id="work-schedule-filters"
+						wire:model.live="workSchedule"
+						class="mt-1 block w-full"
+					>
+						<option value="">Tous les régimes de travail</option>
+
+						@foreach($workSchedules as $workScheduleFiltersEntry)
+							<option value="{{ $workScheduleFiltersEntry->id }}">
+								{{ $workScheduleFiltersEntry->name }}
+							</option>
+						@endforeach
+					</x-select-input>
 				</div>
 			</div>
 		</div>
@@ -563,6 +620,46 @@
 						@endforeach
 					</x-select-input>
 					<x-input-error id="manager-error" :messages="$errors->get('managerSelected')" class="mt-1" />
+				</div>
+
+				{{-- Contract type --}}
+				<div>
+					<x-input-label for="contract-type" value="Type de contrat" :required="true" />
+					<x-select-input
+						id="contract-type"
+						wire:model="contractTypeSelected"
+						class="mt-1 block w-full"
+						:aria-invalid="$errors->has('contractTypeSelected') ? 'true' : null"
+						:aria-describedby="$errors->has('contractTypeSelected') ? 'contract-type-error' : null"
+					>
+						<option value="">Aucun type de contrat</option>
+						@foreach($contractTypes as $contractTypeFormEntry)
+							<option value="{{ $contractTypeFormEntry->id }}">
+								{{ $contractTypeFormEntry->name }}
+							</option>
+						@endforeach
+					</x-select-input>
+					<x-input-error id="contract-type-error" :messages="$errors->get('contractTypeSelected')" class="mt-1" />
+				</div>
+
+				{{-- Work schedule --}}
+				<div>
+					<x-input-label for="work-schedule" value="Régime de travail" :required="true" />
+					<x-select-input
+						id="work-schedule"
+						wire:model="workScheduleSelected"
+						class="mt-1 block w-full"
+						:aria-invalid="$errors->has('workScheduleSelected') ? 'true' : null"
+						:aria-describedby="$errors->has('workScheduleSelected') ? 'work-schedule-error' : null"
+					>
+						<option value="">Aucun régime de travail</option>
+						@foreach($workSchedules as $workScheduleFormEntry)
+							<option value="{{ $workScheduleFormEntry->id }}">
+								{{ $workScheduleFormEntry->name }}
+							</option>
+						@endforeach
+					</x-select-input>
+					<x-input-error id="work-schedule-error" :messages="$errors->get('workScheduleSelected')" class="mt-1" />
 				</div>
 
 				{{-- Buttons --}}

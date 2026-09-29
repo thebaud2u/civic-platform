@@ -11,9 +11,12 @@ return new class extends Migration
 	 */
 	public function up(): void
 	{
-		Schema::table('users', function (Blueprint $table) {
-			$table->foreign('service_id')->references('id')->on('services')->nullOnDelete();
-   		});
+		Schema::create('contract_types', function (Blueprint $table) {
+			$table->id();
+			$table->string('name');
+			$table->timestamps();
+			$table->softDeletes();
+		});
 	}
 
 	/**
@@ -21,8 +24,6 @@ return new class extends Migration
 	 */
 	public function down(): void
 	{
-		Schema::table('users', function (Blueprint $table) {
-			$table->dropForeign(['service_id']);
-		});
+		Schema::dropIfExists('contract_types');
 	}
 };

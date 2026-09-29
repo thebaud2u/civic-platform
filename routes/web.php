@@ -1,19 +1,21 @@
 <?php
 
-use App\Http\Controllers\AccountController;
+use App\Http\Controllers\{AccountController, DashboardController};
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('index');
 })->name('home');
 
-Route::get('/tableau-de-bord', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
-
 Route::middleware('auth')->group(function () {
-    Route::get('/mon-compte', [AccountController::class, 'edit'])->name('account.edit');
-    Route::patch('/mon-compte', [AccountController::class, 'update'])->name('account.update');
+    Route::controller(AccountController::class)->group(function () {
+        Route::get('/mon-compte', [AccountController::class, 'edit'])->name('account.edit');
+        Route::patch('/mon-compte', [AccountController::class, 'update'])->name('account.update');
+    });
+
+    Route::controller(DashboardController::class)->group(function () {
+        Route::get('/tableau-de-bord', 'index')->name('dashboard'); // dashboard
+    });
 });
 
 require __DIR__.'/auth.php';

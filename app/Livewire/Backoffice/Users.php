@@ -2,7 +2,7 @@
 
 namespace App\Livewire\BackOffice;
 
-use App\Models\{Service, User};
+use App\Models\{ContractType, Service, User, WorkSchedule};
 use App\Notifications\UserWelcome;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
@@ -29,6 +29,8 @@ class Users extends Component
 	public $serviceSelected;
 	public $managerSelected;
 	public $roleSelected;
+	public $contractTypeSelected;
+	public $workScheduleSelected;
 
 	public $isUserManagerOfAService = false;
 	public $switchState = '';
@@ -37,6 +39,8 @@ class Users extends Component
 	public $role;
 	public $service;
 	public $manager;
+	public $contractType;
+	public $workSchedule;
 	public $keyword;
 
 	public function toggleUser()
@@ -85,6 +89,8 @@ class Users extends Component
 				$this->roleSelected = $this->user->getRoleNames()->first();
 				$this->serviceSelected = $this->user->managedService?->slug;
 				$this->managerSelected = $this->user->manager?->slug;
+				$this->contractTypeSelected = $this->user->contractType?->id;
+				$this->workScheduleSelected = $this->user->workSchedule?->id;
 
 				$this->isUserManagerOfAService = $this->user->managedService()->exists();
 			}
@@ -117,6 +123,8 @@ class Users extends Component
 			'roleSelected' => ['required', Rule::in($rolesAllowed)],
 			'serviceSelected' => ['nullable', 'string', 'exists:services,slug'],
 			'managerSelected' => ['nullable', 'string', 'exists:users,slug'],
+			'contractTypeSelected' => ['required', 'integer', 'exists:contract_types,id'],
+			'workScheduleSelected' => ['required', 'integer', 'exists:work_schedules,id'],
 		];
 
 		$messages = [
@@ -138,6 +146,10 @@ class Users extends Component
 			'roleSelected.in' => 'Le rôle sélectionné est invalide',
 			'serviceSelected.exists' => 'Le service sélectionné est invalide',
 			'managerSelected.exists' => 'Le chef de service sélectionné est invalide',
+			'contractTypeSelected.required' => 'Le type de contrat est obligatoire',
+			'contractTypeSelected.exists' => 'Le type de contrat sélectionné est invalide',
+			'workScheduleSelected.required' => 'Le régime de travail est obligatoire',
+			'workScheduleSelected.exists' => 'Le régime de travail sélectionné est invalide',
 		];
 
 		$this->validate($rules, $messages);
@@ -158,6 +170,8 @@ class Users extends Component
 				'manager_id' => $this->managerSelected
 					? User::findBySlug($this->managerSelected)?->id
 					: null,
+				'contract_type_id' => ContractType::find($this->contractTypeSelected)?->id,
+				'work_schedule_id' => WorkSchedule::find($this->workScheduleSelected)?->id,
 				'password' => Hash::make(Str::password(12)),
 				'values' => collect([])
 			]);
@@ -182,6 +196,8 @@ class Users extends Component
 			$this->user->manager_id = $this->managerSelected
 				? User::findBySlug($this->managerSelected)?->id
 				: null;
+			$this->user->contract_type_id = ContractType::find($this->contractTypeSelected)?->id;
+			$this->user->work_schedule_id = WorkSchedule::find($this->workScheduleSelected)?->id;
 			$this->user->save();
 
 			$this->user->syncRoles($this->roleSelected);
@@ -208,7 +224,9 @@ class Users extends Component
 			'mobile',
 			'roleSelected',
 			'managerSelected',
-			'serviceSelected'
+			'serviceSelected',
+			'contractTypeSelected',
+			'workScheduleSelected',
 		]);
 		$this->resetValidation();
 		$this->switchState = '';
@@ -244,6 +262,16 @@ class Users extends Component
 					$whereHas->where('slug', $this->manager);
 				});
 			})
+			->when($this->contractType, function($when) {
+				$when->whereHas('contractType', function($whereHas) {
+					$whereHas->where('id', $this->contractType);
+				});
+			})
+			->when($this->workSchedule, function($when) {
+				$when->whereHas('workSchedule', function($whereHas) {
+					$whereHas->where('id', $this->workSchedule);
+				});
+			})
 			->orderBy('last_name')
 			->orderBy('first_name')
 			->withTrashed()
@@ -260,11 +288,19 @@ class Users extends Component
 			->orderBy('first_name')
 			->get();
 
+		$contractTypes = ContractType::orderBy('name')
+			->get();
+
+		$workSchedules = WorkSchedule::orderBy('name')
+			->get();
+
 		return view('livewire.back-office.users', [
 			'users' => $users,
 			'roles' => $roles,
 			'services' => $services,
-			'managers' => $managers
+			'managers' => $managers,
+			'contractTypes' => $contractTypes,
+			'workSchedules' => $workSchedules,
 		]);
 	}
 }

@@ -1,27 +1,62 @@
 <x-guest-layout>
-    <div class="mb-4 text-sm text-gray-600">
-        {{ __('This is a secure area of the application. Please confirm your password before continuing.') }}
-    </div>
+	<div class="flex flex-col gap-4">
+		<header>
+			<h1
+				id="confirm-password-title"
+				class="text-lg font-semibold text-gray-900"
+			>
+				Confirmer votre mot de passe
+			</h1>
 
-    <form method="POST" action="{{ route('password.confirm') }}">
-        @csrf
+			<p
+				id="confirm-password-help"
+				class="text-sm text-gray-600"
+			>
+				Cette zone est sécurisée. Veuillez confirmer votre mot de passe
+				avant de continuer.
+			</p>
+		</header>
 
-        <!-- Password -->
-        <div>
-            <x-input-label for="password" :value="__('Password')" />
+		<form
+			method="POST"
+			action="{{ route('password.confirm') }}"
+			aria-labelledby="confirm-password-title"
+			aria-describedby="confirm-password-help"
+		>
+			@csrf
 
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
+			<div>
+				<x-input-label
+					for="password"
+					value="Mot de passe"
+				/>
 
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
+				<x-text-input
+					id="password"
+					class="mt-1 block w-full"
+					type="password"
+					name="password"
+					required
+					autofocus
+					autocomplete="current-password"
+					:aria-invalid="$errors->has('password') ? 'true' : 'false'"
+					:aria-errormessage="$errors->has('password') ? 'password-error' : null"
+					:aria-describedby="$errors->has('password') ? 'password-error' : null"
+				/>
 
-        <div class="flex justify-end mt-4">
-            <x-primary-button>
-                {{ __('Confirm') }}
-            </x-primary-button>
-        </div>
-    </form>
+				<x-input-error
+					id="password-error"
+					role="alert"
+					:messages="$errors->get('password')"
+					class="mt-2"
+				/>
+			</div>
+
+			<div class="mt-4 flex justify-end">
+				<x-primary-button type="submit">
+					Confirmer le mot de passe
+				</x-primary-button>
+			</div>
+		</form>
+	</div>
 </x-guest-layout>

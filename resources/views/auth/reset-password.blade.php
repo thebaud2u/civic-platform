@@ -1,43 +1,125 @@
 <x-guest-layout>
-	<div class="flex flex-col gap-x-4">
-		<h1 id="forgot-title" class="mb-2 text-lg font-semibold text-gray-900">
-			Mot de passe oublié
-		</h1>
+	<div class="flex flex-col gap-4">
+		<header>
+			<h1
+				id="reset-password-title"
+				class="text-lg font-semibold text-gray-900"
+			>
+				Définir un nouveau mot de passe
+			</h1>
 
-		<p id="forgot-help" class="mb-4 text-sm text-gray-600">
-			Vous avez oublié votre mot de passe ? Pas de problème. Indiquez-nous votre adresse e-mail et nous vous enverrons un lien de réinitialisation qui vous permettra d'en choisir un nouveau.
-		</p>
+			<p
+				id="reset-password-help"
+				class="text-sm text-gray-600"
+			>
+				Choisissez un nouveau mot de passe pour votre compte.
+			</p>
+		</header>
 
-		<x-auth-session-status class="mb-4" :status="session('status')" role="status" />
-
-		<form method="POST" action="{{ route('password.email') }}" aria-labelledby="forgot-title">
+		<form
+			method="POST"
+			action="{{ route('password.store') }}"
+			aria-labelledby="reset-password-title"
+			aria-describedby="reset-password-help"
+		>
 			@csrf
 
-			<!-- Email -->
+			<!-- Password Reset Token -->
+			<input
+				type="hidden"
+				name="token"
+				value="{{ $request->route('token') }}"
+			>
+
+			<!-- Email Address -->
 			<div>
-				<x-input-label for="email" value="Email" />
+				<x-input-label
+					for="email"
+					value="Adresse e-mail"
+				/>
+
 				<x-text-input
 					id="email"
-					class="block mt-1 w-full"
+					class="mt-1 block w-full"
 					type="email"
 					name="email"
-					placeholder="Email"
-					:value="old('email')"
+					:value="old('email', $request->email)"
 					required
 					autofocus
-					autocomplete="username"
+					autocomplete="email"
 					inputmode="email"
 					autocapitalize="none"
 					spellcheck="false"
 					:aria-invalid="$errors->has('email') ? 'true' : 'false'"
-					:aria-describedby="'forgot-help'.($errors->has('email') ? ' email-error' : '')"
+					:aria-errormessage="$errors->has('email') ? 'email-error' : null"
+					:aria-describedby="$errors->has('email') ? 'email-error' : null"
 				/>
-				<x-input-error id="email-error" role="alert" :messages="$errors->get('email')" class="mt-2" />
+
+				<x-input-error
+					id="email-error"
+					role="alert"
+					:messages="$errors->get('email')"
+					class="mt-2"
+				/>
 			</div>
 
-			<div class="flex items-center justify-end mt-4">
+			<!-- Password -->
+			<div class="mt-4">
+				<x-input-label
+					for="password"
+					value="Mot de passe"
+				/>
+
+				<x-text-input
+					id="password"
+					class="mt-1 block w-full"
+					type="password"
+					name="password"
+					required
+					autocomplete="new-password"
+					:aria-invalid="$errors->has('password') ? 'true' : 'false'"
+					:aria-errormessage="$errors->has('password') ? 'password-error' : null"
+					:aria-describedby="$errors->has('password') ? 'password-error' : null"
+				/>
+
+				<x-input-error
+					id="password-error"
+					role="alert"
+					:messages="$errors->get('password')"
+					class="mt-2"
+				/>
+			</div>
+
+			<!-- Confirm Password -->
+			<div class="mt-4">
+				<x-input-label
+					for="password_confirmation"
+					value="Confirmer le mot de passe"
+				/>
+
+				<x-text-input
+					id="password_confirmation"
+					class="mt-1 block w-full"
+					type="password"
+					name="password_confirmation"
+					required
+					autocomplete="new-password"
+					:aria-invalid="$errors->has('password_confirmation') ? 'true' : 'false'"
+					:aria-errormessage="$errors->has('password_confirmation') ? 'password-confirmation-error' : null"
+					:aria-describedby="$errors->has('password_confirmation') ? 'password-confirmation-error' : null"
+				/>
+
+				<x-input-error
+					id="password-confirmation-error"
+					role="alert"
+					:messages="$errors->get('password_confirmation')"
+					class="mt-2"
+				/>
+			</div>
+
+			<div class="mt-4 flex items-center justify-end">
 				<x-primary-button type="submit">
-					Envoyer le lien de réinitialisation
+					Définir mon mot de passe
 				</x-primary-button>
 			</div>
 		</form>

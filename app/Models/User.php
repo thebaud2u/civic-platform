@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -31,6 +30,8 @@ use Spatie\Sluggable\SlugOptions;
 	'values',
 	'service_id',
 	'manager_id',
+	'contract_type_id',
+	'work_schedule_id',
 	'last_logon'
 ])]
 #[Hidden(['password', 'remember_token'])]
@@ -78,6 +79,11 @@ class User extends Authenticatable
 	}
 
 	// Relations
+	public function contractType(): BelongsTo
+	{
+		return $this->belongsTo(ContractType::class);
+	}
+
 	public function manager(): BelongsTo
 	{
 		return $this->belongsTo(User::class, 'manager_id');
@@ -91,5 +97,10 @@ class User extends Authenticatable
 	public function service(): BelongsTo
 	{
 		return $this->belongsTo(Service::class);
+	}
+
+	public function workSchedule(): BelongsTo
+	{
+		return $this->belongsTo(WorkSchedule::class);
 	}
 }
