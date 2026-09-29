@@ -12,6 +12,6 @@ class BackofficeLayout extends Component
 	 */
 	public function render(): View
 	{
-		return view('layouts.back_office');
+		return view('components.layouts.backoffice');
 	}
 }

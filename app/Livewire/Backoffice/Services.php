@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Backoffice;
+namespace App\Livewire\BackOffice;
 
 use App\Models\{Service, User};
 use Livewire\Component;
@@ -138,7 +138,7 @@ class Services extends Component
 			->orderBy('first_name')
 			->get();
 
-		return view('livewire.back_office.services', [
+		return view('livewire.back-office.services', [
 			'services' => $services,
 			'managers' => $managers
 		]);

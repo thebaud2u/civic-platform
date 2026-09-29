@@ -13,6 +13,6 @@ class ServiceController extends Controller
 	 */
 	public function index()
 	{
-		return view('back_office.services.index');
+		return view('back-office.services.index');
 	}
 }

@@ -14,7 +14,7 @@ class DashboardController extends Controller
 	 */
 	public function index()
 	{
-		return view('back_office.dashboard', [
+		return view('back-office.dashboard', [
 			'countUsers' => User::all()->count(),
 		]);
 	}

@@ -18,8 +18,10 @@ return new class extends Migration
 			$table->string('first_name')->nullable();
 			$table->string('last_name')->nullable();
 			$table->string('email')->unique();
+			$table->string('slug');
 			$table->string('password')->nullable();
 			$table->rememberToken();
+			$table->timestamp('last_logon')->nullable();
 			$table->timestamps();
 			$table->softDeletes();
 		});

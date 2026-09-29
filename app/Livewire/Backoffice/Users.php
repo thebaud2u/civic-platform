@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Livewire\Backoffice;
+namespace App\Livewire\BackOffice;
 
 use App\Models\{Service, User};
+use App\Notifications\UserWelcome;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
@@ -30,14 +31,13 @@ class Users extends Component
 	public $roleSelected;
 
 	public $isUserManagerOfAService = false;
+	public $switchState = '';
 
 	// Criterias
 	public $role;
 	public $service;
 	public $manager;
 	public $keyword;
-
-	public $switchState = '';
 
 	public function toggleUser()
 	{
@@ -165,7 +165,7 @@ class Users extends Component
 			$user->assignRole($this->roleSelected);
 
 			$token = Password::createToken($user);
-			$user->sendPasswordResetNotification($token);
+			$user->notify(new UserWelcome($token));
 		}
 		// Update
 		else {
@@ -223,12 +223,10 @@ class Users extends Component
 
 	public function render()
 	{
-		$users = User::distinct('users.id')
-			->when($this->keyword, function($when) {
+		$users = User::when($this->keyword, function($when) {
 				$when->where('first_name', 'LIKE', '%'.$this->keyword.'%')
 					->orWhere('last_name', 'LIKE', '%'.$this->keyword.'%')
 					->orWhere('email', 'LIKE', '%'.$this->keyword.'%')
-					->orWhere('id', 'LIKE', '%'.$this->keyword.'%')
 					->orWhere('slug', 'LIKE', '%'.$this->keyword.'%');
 			})
 			->when($this->role, function($when) {
@@ -246,7 +244,8 @@ class Users extends Component
 					$whereHas->where('slug', $this->manager);
 				});
 			})
-			->orderByDesc('last_logon')
+			->orderBy('last_name')
+			->orderBy('first_name')
 			->withTrashed()
 			->paginate(10);
 
@@ -261,7 +260,7 @@ class Users extends Component
 			->orderBy('first_name')
 			->get();
 
-		return view('livewire.back_office.users', [
+		return view('livewire.back-office.users', [
 			'users' => $users,
 			'roles' => $roles,
 			'services' => $services,

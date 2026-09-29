@@ -17,5 +17,7 @@ class AdminsSeeder extends Seeder
 		$newAdmin->email = 'thebaud.clement@gmail.com';
 		$newAdmin->password = Hash::make('KsL8aAffI4n0brGYEYZw');
 		$newAdmin->save();
+
+		$newAdmin->assignRole('super admin');
 	}
 }

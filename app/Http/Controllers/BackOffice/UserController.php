@@ -13,6 +13,6 @@ class UserController extends Controller
 	 */
 	public function index()
 	{
-		return view('back_office.users.index');
+		return view('back-office.users.index');
 	}
 }

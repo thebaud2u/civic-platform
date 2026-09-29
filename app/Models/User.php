@@ -49,8 +49,8 @@ class User extends Authenticatable
 		return [
 			'values' => AsCollection::class,
 			'birthday' => 'date',
-			'last_logon' => 'datetime',
 			'password' => 'hashed',
+			'last_logon' => 'datetime',
 			'created_at' => 'datetime',
 			'updated_at' => 'datetime',
 			'deleted_at' => 'datetime'
@@ -67,7 +67,7 @@ class User extends Authenticatable
 	{
 		return SlugOptions::create()
 			->saveSlugsTo('slug')
-			->generateSlugsFrom('last_name');
+			->generateSlugsFrom(['first_name', 'last_name']);
 	}
 
 	protected function fullName(): Attribute
@@ -86,5 +86,10 @@ class User extends Authenticatable
 	public function managedService(): HasOne
 	{
 		return $this->hasOne(Service::class, 'manager_id');
+	}
+
+	public function service(): BelongsTo
+	{
+		return $this->belongsTo(Service::class);
 	}
 }

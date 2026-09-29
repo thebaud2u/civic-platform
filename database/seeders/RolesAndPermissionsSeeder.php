@@ -13,6 +13,7 @@ class RolesAndPermissionsSeeder extends Seeder
 		Role::create(['name' => 'agent', 'guard_name' => 'web']);
 		Role::create(['name' => 'chef de service', 'guard_name' => 'web']);
 		Role::create(['name' => 'admin', 'guard_name' => 'admin']);
+		Role::create(['name' => 'super admin', 'guard_name' => 'admin']);
 
 		Permission::create(['name' => 'dayOff.read']);
 		Permission::create(['name' => 'dayOff.create']);
