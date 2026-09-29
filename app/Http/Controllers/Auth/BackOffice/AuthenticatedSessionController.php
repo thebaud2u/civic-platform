@@ -16,7 +16,8 @@ class AuthenticatedSessionController extends Controller
 	 */
 	public function create(): View
 	{
-		return view('auth.back-office.login');
+		if(Auth::guard('admin')->check()) return redirect()->intended(route('back-office.dashboard'));
+		else return view('auth.back-office.login');
 	}
 
 	/**

@@ -6,7 +6,9 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="csrf-token" content="{{ csrf_token() }}">
 
-	<title>{{ $title ? $title.' – ' : '' }}{{ config('app.name') }}</title>
+	<title>
+		{{ config('app.name') }}
+	</title>
 
 	<link rel="preconnect" href="https://fonts.bunny.net">
 	<link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
@@ -30,15 +32,9 @@
 
 			{{-- Navigation --}}
 			<nav aria-label="Navigation principale" class="flex items-center gap-3">
-				@auth
-					<x-primary-button :href="route('dashboard')">
-						Dashboard
-					</x-primary-button>
-				@else
-					<x-primary-button :href="route('back-office.login')">
-						Back-office
-					</x-primary-button>
-				@endauth
+				<x-primary-button :href="route('back-office.login')">
+					Back-office
+				</x-primary-button>
 			</nav>
 		</div>
 	</header>
