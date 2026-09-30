@@ -21,16 +21,6 @@ Route::middleware('guest')->group(function () {
 	Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
 
 	Route::post('reset-password', [NewPasswordController::class, 'store'])->name('password.store');
-
-	Route::prefix('/back-office')->name('back-office.')->group(function () {
-		Route::get('login', [BackOfficeAuthenticatedSessionController::class, 'create'])->name('login'); // back-office.login
-
-		Route::post('login', [BackOfficeAuthenticatedSessionController::class, 'store']);
-
-		Route::get('reset-password/{token}', [BackOfficeNewPasswordController::class, 'create'])->name('password.reset');
-
-		Route::post('reset-password', [BackOfficeNewPasswordController::class, 'store'])->name('password.store');
-	});
 });
 
 Route::middleware('auth')->group(function () {
@@ -41,10 +31,4 @@ Route::middleware('auth')->group(function () {
 	Route::put('password', [PasswordController::class, 'update'])->name('password.update');
 
 	Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
-});
-
-Route::middleware('auth:admin')->group(function () {
-	Route::prefix('/back-office')->name('back-office.')->group(function () {
-		Route::post('logout', [BackOfficeAuthenticatedSessionController::class, 'destroy'])->name('logout'); // back-office.logout
-	});
 });

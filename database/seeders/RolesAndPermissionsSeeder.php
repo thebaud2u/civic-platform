@@ -10,31 +10,35 @@ class RolesAndPermissionsSeeder extends Seeder
 {
 	public function run(): void
 	{
-		Role::create(['name' => 'agent', 'guard_name' => 'web']);
-		Role::create(['name' => 'chef de service', 'guard_name' => 'web']);
-		Role::create(['name' => 'admin', 'guard_name' => 'admin']);
-		Role::create(['name' => 'super admin', 'guard_name' => 'admin']);
+		Role::create(['name' => 'agent']);
+		Role::create(['name' => 'chef de service']);
+		Role::create(['name' => 'admin']);
 
-		Permission::create(['name' => 'dayOff.read']);
-		Permission::create(['name' => 'dayOff.create']);
-		Permission::create(['name' => 'dayOff.update']);
-		Permission::create(['name' => 'dayOff.delete']);
+		Permission::create(['name' => 'dayoff.read']);
+		Permission::create(['name' => 'dayoff.create']);
+		Permission::create(['name' => 'dayoff.update']);
+		Permission::create(['name' => 'dayoff.delete']);
+
+		Permission::create(['name' => 'backoffice.access']);
 
 		$agent = Role::findByName('agent');
 		$manager = Role::findByName('chef de service');
+		$admin = Role::findByName('admin');
 
 		$agent->givePermissionTo([
-			'dayOff.read',
-			'dayOff.create',
-			'dayOff.update',
-			'dayOff.delete',
+			'dayoff.read',
+			'dayoff.create',
+			'dayoff.update',
+			'dayoff.delete',
 		]);
 
 		$manager->givePermissionTo([
-			'dayOff.read',
-			'dayOff.create',
-			'dayOff.update',
-			'dayOff.delete',
+			'dayoff.read',
+			'dayoff.create',
+			'dayoff.update',
+			'dayoff.delete',
 		]);
+
+		$admin->givePermissionTo('backoffice.access');
 	}
 }

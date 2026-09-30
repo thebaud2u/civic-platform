@@ -29,13 +29,6 @@
 			<a href="{{ url('/') }}" class="rounded text-xl font-semibold tracking-tight text-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500">
 				{{ config('app.name') }}
 			</a>
-
-			{{-- Navigation --}}
-			<nav aria-label="Navigation principale" class="flex items-center gap-3">
-				<x-primary-button :href="route('back-office.login')">
-					Back-office
-				</x-primary-button>
-			</nav>
 		</div>
 	</header>
 

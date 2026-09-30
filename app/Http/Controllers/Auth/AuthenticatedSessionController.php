@@ -11,11 +11,22 @@ use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
 {
+	private function redirectByAccess(): RedirectResponse
+	{
+		return Auth::user()->can('backoffice.access')
+			? redirect()->route('back-office.dashboard')
+			: redirect()->route('dashboard');
+	}
+
 	/**
 	 * Display the login view.
 	 */
-	public function create(): View
+	public function create(): View|RedirectResponse
 	{
+		if (Auth::check()) {
+			return $this->redirectByAccess();
+		}
+
 		return view('auth.login');
 	}
 
@@ -28,7 +39,8 @@ class AuthenticatedSessionController extends Controller
 
 		$request->session()->regenerate();
 
-		return redirect()->intended(route('dashboard', absolute: false));
+		if(Auth::user()->hasRole('admin')) return redirect()->route('back-office.dashboard');
+		else return redirect()->route('dashboard');
 	}
 
 	/**

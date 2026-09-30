@@ -11,12 +11,11 @@ use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| Admin Routes
+| Back-office Routes
 |--------------------------------------------------------------------------
 */
 Route::prefix('/back-office')->name('back-office.')->group(function () {
-	/** Admin authenticated routes */
-	Route::middleware(['auth:admin'])->group(function () {
+	Route::middleware(['auth', 'can:backoffice.access'])->group(function () {
 		Route::get('/script/{code}/{data?}', [ScriptController::class, 'script']);
 
 		Route::controller(DashboardController::class)->group(function () {

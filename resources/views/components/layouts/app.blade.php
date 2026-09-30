@@ -34,6 +34,12 @@
 
 			{{-- User / Logout --}}
 			<div class="flex items-center gap-4">
+				@can('backoffice.access')
+					<x-primary-button :href="route('back-office.dashboard')">
+						Back-office
+					</x-primary-button>
+				@endcan
+
 				<a href="{{ route('account.edit') }}">
 					<div class="min-w-0 max-w-[9rem] text-right sm:max-w-xs">
 						<p class="truncate text-sm font-medium text-gray-900">

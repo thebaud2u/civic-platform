@@ -60,7 +60,7 @@
 							viewBox="0 0 24 24"
 							stroke-width="1.5"
 							stroke="currentColor"
-							class="h-5 w-5"
+							class="size-5"
 							aria-hidden="true"
 						>
 							<path
@@ -137,7 +137,7 @@
 											viewBox="0 0 24 24"
 											stroke-width="1.5"
 											stroke="currentColor"
-											class="h-5 w-5"
+											class="size-5"
 											aria-hidden="true"
 										>
 											<path
@@ -161,7 +161,7 @@
 											viewBox="0 0 24 24"
 											stroke-width="1.5"
 											stroke="currentColor"
-											class="h-5 w-5"
+											class="size-5"
 											aria-hidden="true"
 										>
 											<path

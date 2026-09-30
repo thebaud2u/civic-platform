@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\{ContractType, Time, Service, User, WorkSchedule};
+use App\Models\{Time, User};
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -10,27 +10,7 @@ class TimesSeeder extends Seeder
 {
 	public function run(): void
 	{
-		$contractType = ContractType::where('name', 'Contractuel')
-			->first();
-
-		$workSchedule = WorkSchedule::where('weekly_hours', 35)
-			->first();
-
-		$service = Service::findBySlug('communication');
-
-		$user = User::create([
-			'gender' => 'mme',
-			'first_name' => 'Manon',
-			'last_name' => 'Burus',
-			'email' => 'manonburus@live.fr',
-			'password' => Hash::make('test1234'),
-			'contract_type_id' => $contractType->id,
-			'work_schedule_id' => $workSchedule->id,
-			'service_id' => $service->id,
-		]);
-
-		$user->assignRole('agent');
-
+		$user = User::findBySlug('manon-burus');
 		$startOfWeek = now()->startOfWeek();
 
 		/*

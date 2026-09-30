@@ -33,7 +33,8 @@ class Users extends Component
 	public $workScheduleSelected;
 
 	public $isUserManagerOfAService = false;
-	public $switchState = '';
+	public $accountState = '';
+	public $backOfficeAccessState = '';
 
 	// Criterias
 	public $role;
@@ -50,6 +51,17 @@ class Users extends Component
 			else $this->user->delete();
 
 			$this->dispatch('account-toggled');
+			$this->fresh();
+		}
+	}
+
+	public function toggleBackOfficeAccess()
+	{
+		if($this->user->exists) {
+			if($this->user->can('backoffice.access')) $this->user->revokePermissionTo('backoffice.access');
+			else $this->user->givePermissionTo('backoffice.access');
+
+			$this->dispatch('back-office-access-toggled');
 			$this->fresh();
 		}
 	}
@@ -72,9 +84,15 @@ class Users extends Component
 		if($user) {
 			$this->user = $user;
 
-			if($modal == 'toggle-account') {
-				if($this->user->trashed()) $this->switchState = 'Activer le compte';
-				else $this->switchState = 'Désactiver le compte';
+			if($modal == 'toggle-account' || $modal == 'toggle-back-office-access') {
+				if($modal == 'toggle-account') {
+					if($this->user->trashed()) $this->accountState = 'Activer le compte';
+					else $this->accountState = 'Désactiver le compte';
+				}
+				elseif($modal == 'toggle-back-office-access') {
+					if($this->user->can('backoffice.access')) $this->backOfficeAccessState = 'Révoquer l\'accès au back-office';
+					else $this->backOfficeAccessState = 'Donner l\'accès au back-office';
+				}
 			}
 			elseif($modal == 'user-form') {
 				$this->resetValidation();
@@ -229,7 +247,7 @@ class Users extends Component
 			'workScheduleSelected',
 		]);
 		$this->resetValidation();
-		$this->switchState = '';
+		$this->accountState = '';
 		$this->isUserManagerOfAService = false;
 		$this->dispatch('user-reset');
 	}
@@ -261,6 +279,8 @@ class Users extends Component
 				$when->whereHas('manager', function($whereHas) {
 					$whereHas->where('slug', $this->manager);
 				});
+			}, function($default) {
+				$default->role(['agent', 'chef de service']);
 			})
 			->when($this->contractType, function($when) {
 				$when->whereHas('contractType', function($whereHas) {
@@ -277,7 +297,7 @@ class Users extends Component
 			->withTrashed()
 			->paginate(10);
 
-		$roles = Role::where('guard_name', 'web')
+		$roles = Role::whereIn('name', ['agent', 'chef de service'])
 			->get();
 
 		$services = Service::orderBy('name')

@@ -14,8 +14,10 @@ class DashboardController extends Controller
 	 */
 	public function index()
 	{
+		$countUsers = User::role(['agent', 'chef de service'])->count();
+
 		return view('back-office.dashboard', [
-			'countUsers' => User::all()->count(),
+			'countUsers' => $countUsers,
 		]);
 	}
 }
