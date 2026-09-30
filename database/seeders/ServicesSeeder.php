@@ -2,10 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
-
 use App\Models\Service;
+use Illuminate\Database\Seeder;
 
 class ServicesSeeder extends Seeder
 {

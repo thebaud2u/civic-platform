@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -11,6 +12,12 @@ class DashboardController extends Controller
 	 */
 	public function index(): View
 	{
-		return view('dashboard');
+		$user = Auth::guard('web')->user();
+		$weeklyTimeSummary = $user->weeklyTimeSummary();
+
+		return view('dashboard', compact(
+			'user',
+			'weeklyTimeSummary'
+		));
 	}
 }

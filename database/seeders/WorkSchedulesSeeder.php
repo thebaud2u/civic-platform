@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-
 use App\Models\WorkSchedule;
+use Illuminate\Database\Seeder;
 
 class WorkSchedulesSeeder extends Seeder
 {
@@ -18,6 +17,10 @@ class WorkSchedulesSeeder extends Seeder
 			1 => [
 				'name' => 'Temps complet 39h',
 				'weekly_hours' => 39
+			],
+			2 => [
+				'name' => 'Au forfait',
+				'weekly_hours' => null
 			]
 		];
 

@@ -2,15 +2,17 @@
 
 namespace App\Models;
 
-use Database\Factories\UserFactory;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Casts\AsCollection;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
@@ -37,8 +39,7 @@ use Spatie\Sluggable\SlugOptions;
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
-	/** @use HasFactory<UserFactory> */
-	use HasFactory, HasRoles, HasSlug, Notifiable, SoftDeletes;
+	use HasRoles, HasSlug, Notifiable, SoftDeletes;
 
 	/**
 	 * Get the attributes that should be cast.
@@ -99,8 +100,150 @@ class User extends Authenticatable
 		return $this->belongsTo(Service::class);
 	}
 
+	public function times(): HasMany
+	{
+		return $this->hasMany(Time::class);
+	}
+
 	public function workSchedule(): BelongsTo
 	{
 		return $this->belongsTo(WorkSchedule::class);
+	}
+
+	// Functions
+	public function timesOfWeek(?int $week = null): Collection
+	{
+		$date = Carbon::now();
+
+		if ($week) {
+			$date->setISODate($date->year, $week);
+		}
+
+		$startOfWeek = $date->startOfWeek();
+		$endOfWeek = $date->copy()->endOfWeek();
+
+		return $this->times()
+			->whereBetween('created_at', [$startOfWeek, $endOfWeek])
+			->get();
+	}
+
+	public function weeklyTimeSummary(?int $week = null): array
+	{
+		$times = $this->timesOfWeek($week)
+			->sortBy('created_at');
+
+		$weeklyHours = $this->workSchedule->weekly_hours;
+
+		$expectedMinutes = $weeklyHours !== null
+			? $weeklyHours * 60
+			: null;
+
+		$dailyExpectedMinutes = $weeklyHours !== null
+			? intdiv($expectedMinutes, 5)
+			: null;
+
+		$totalMinutes = 0;
+		$daily = [];
+
+		$in = null;
+
+		foreach ($times as $time) {
+			if ($time->way === 'in') {
+				$in = $time;
+
+				continue;
+			}
+
+			if ($time->way === 'out' && $in) {
+				// Le OUT doit être le même jour que le IN.
+				if ($in->created_at->isSameDay($time->created_at)) {
+					$minutes = $in->created_at->diffInMinutes($time->created_at);
+
+					$date = $in->created_at->format('Y-m-d');
+
+					if (!isset($daily[$date])) {
+						$daily[$date] = [
+							'date' => $in->created_at,
+							'pairs' => [],
+							'minutes' => 0,
+							'has_anomaly' => false,
+						];
+					}
+
+					$daily[$date]['pairs'][] = [
+						'in' => $in,
+						'out' => $time,
+					];
+
+					$daily[$date]['minutes'] += $minutes;
+
+					$totalMinutes += $minutes;
+				} else {
+					// Le OUT est le lendemain ou un autre jour :
+					// la période est considérée comme invalide.
+					$date = $in->created_at->format('Y-m-d');
+
+					if (!isset($daily[$date])) {
+						$daily[$date] = [
+							'date' => $in->created_at,
+							'pairs' => [],
+							'minutes' => 0,
+							'has_anomaly' => false,
+						];
+					}
+
+					$daily[$date]['has_anomaly'] = true;
+
+					$outDate = $time->created_at->format('Y-m-d');
+
+					if (!isset($daily[$outDate])) {
+						$daily[$outDate] = [
+							'date' => $time->created_at,
+							'pairs' => [],
+							'minutes' => 0,
+							'has_anomaly' => false,
+						];
+					}
+
+					$daily[$outDate]['has_anomaly'] = true;
+				}
+
+				$in = null;
+			}
+		}
+
+		// Un IN sans OUT à la fin de la période.
+		if ($in) {
+			$date = $in->created_at->format('Y-m-d');
+
+			if (!isset($daily[$date])) {
+				$daily[$date] = [
+					'date' => $in->created_at,
+					'pairs' => [],
+					'minutes' => 0,
+					'has_anomaly' => false,
+				];
+			}
+
+			$daily[$date]['has_anomaly'] = true;
+		}
+
+		foreach ($daily as &$day) {
+			$day['difference'] = $dailyExpectedMinutes !== null
+				? $day['minutes'] - $dailyExpectedMinutes
+				: null;
+		}
+
+		unset($day);
+
+		return [
+			'days' => array_values($daily),
+			'total' => $totalMinutes,
+			'expected' => $expectedMinutes,
+			'difference' => $expectedMinutes !== null
+				? $totalMinutes - $expectedMinutes
+				: null,
+			'is_hourly' => $weeklyHours !== null,
+		];
 	}
 }

@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
 			ContractTypesSeeder::class,
 			WorkSchedulesSeeder::class,
 			ServicesSeeder::class,
+			TimesSeeder::class,
 		]);
 	}
 }
