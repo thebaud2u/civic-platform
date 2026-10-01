@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[Fillable([
 	'user_id',
 	'way',
+	'date',
+	'manager_id',
 ])]
 class Time extends Model
 {
@@ -21,6 +23,7 @@ class Time extends Model
 	protected function casts(): array
 	{
 		return [
+			'date' => 'datetime',
 			'created_at' => 'datetime',
 			'updated_at' => 'datetime',
 			'deleted_at' => 'datetime'
@@ -30,6 +33,11 @@ class Time extends Model
 	// Tools
 
 	// Relations
+	public function manager(): BelongsTo
+	{
+		return $this->belongsTo(User::class, 'manager_id');
+	}
+
 	public function user(): BelongsTo
 	{
 		return $this->belongsTo(User::class);

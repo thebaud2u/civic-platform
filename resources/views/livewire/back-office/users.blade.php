@@ -84,6 +84,8 @@
 						id="role-filters"
 						wire:model.live="role"
 						class="mt-1 block w-full"
+						:aria-invalid="$errors->has('filterUserSelected') ? 'true' : null"
+						:aria-describedby="$errors->has('filterUserSelected') ? 'role-filters' : null"
 					>
 						<option value="">Tous les rôles</option>
 
@@ -103,6 +105,8 @@
 						id="service-filters"
 						wire:model.live="service"
 						class="mt-1 block w-full"
+						:aria-invalid="$errors->has('filterUserSelected') ? 'true' : null"
+						:aria-describedby="$errors->has('filterUserSelected') ? 'service-filters' : null"
 					>
 						<option value="">Tous les services</option>
 
@@ -122,6 +126,8 @@
 						id="manager-filters"
 						wire:model.live="manager"
 						class="mt-1 block w-full"
+						:aria-invalid="$errors->has('filterUserSelected') ? 'true' : null"
+						:aria-describedby="$errors->has('filterUserSelected') ? 'manager-filters' : null"
 					>
 						<option value="">Tous les chefs de service</option>
 
@@ -141,6 +147,8 @@
 						id="contract-type-filters"
 						wire:model.live="contractType"
 						class="mt-1 block w-full"
+						:aria-invalid="$errors->has('filterUserSelected') ? 'true' : null"
+						:aria-describedby="$errors->has('filterUserSelected') ? 'contract-type-filters' : null"
 					>
 						<option value="">Tous les types de contrat</option>
 
@@ -160,6 +168,8 @@
 						id="work-schedule-filters"
 						wire:model.live="workSchedule"
 						class="mt-1 block w-full"
+						:aria-invalid="$errors->has('filterUserSelected') ? 'true' : null"
+						:aria-describedby="$errors->has('filterUserSelected') ? 'work-schedule-filters' : null"
 					>
 						<option value="">Tous les régimes de travail</option>
 
@@ -243,11 +253,11 @@
 							<td class="px-6 py-4">
 								@if($userEntry->roles->isNotEmpty())
 									@if($userEntry->hasRole('agent'))
-										<span class="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700">
+										<span class="inline-flex items-center whitespace-nowrap rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700">
 											Agent
 										</span>
 									@elseif($userEntry->hasRole('chef de service'))
-										<span class="inline-flex items-center rounded-full bg-purple-50 px-2.5 py-1 text-xs font-medium text-purple-700">
+										<span class="inline-flex items-center whitespace-nowrap rounded-full bg-purple-50 px-2.5 py-1 text-xs font-medium text-purple-700">
 											Chef de service
 										</span>
 									@endif

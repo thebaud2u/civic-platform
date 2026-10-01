@@ -31,7 +31,13 @@
 				{{ 'En '.$user->contractType->name }}
 			@endif
 
-			{{ ' en '.strtolower($user->workSchedule->name) }}
+			@if($user->workSchedule->name == 'Au forfait')
+				{{ ' '.strtolower($user->workSchedule->name).',' }}
+			@else
+				{{ ' en '.strtolower($user->workSchedule->name).',' }}
+			@endif
+
+			{{ 'horaires '.strtolower($user->workScheduleType->name).'s.' }}
 		</p>
 	</div>
 </section>

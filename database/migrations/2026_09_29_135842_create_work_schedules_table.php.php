@@ -16,7 +16,6 @@ return new class extends Migration
 			$table->string('name');
 			$table->integer('weekly_hours')->nullable();
 			$table->timestamps();
-			$table->softDeletes();
 		});
 	}
 

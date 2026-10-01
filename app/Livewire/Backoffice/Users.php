@@ -20,29 +20,29 @@ class Users extends Component
 
 	// Properties
 	public $gender = 'mr';
-	public $firstName;
-	public $lastName;
+	public string $firstName = '';
+	public string $lastName = '';
 	public $email;
 	public $birthday;
-	public $phone;
-	public $mobile;
-	public $serviceSelected;
-	public $managerSelected;
-	public $roleSelected;
-	public $contractTypeSelected;
-	public $workScheduleSelected;
+	public string $phone = '';
+	public string $mobile = '';
+	public string $serviceSelected = '';
+	public string $managerSelected = '';
+	public int $roleSelected = 0;
+	public int $contractTypeSelected = 0;
+	public int $workScheduleSelected = 0;
 
 	public $isUserManagerOfAService = false;
 	public $accountState = '';
 	public $backOfficeAccessState = '';
 
 	// Criterias
-	public $role;
-	public $service;
-	public $manager;
-	public $contractType;
-	public $workSchedule;
-	public $keyword;
+	public int $role = 0;
+	public string $service = '';
+	public string $manager = '';
+	public int $contractType = 0;
+	public int $workSchedule = 0;
+	public string $keyword = '';
 
 	public function toggleUser()
 	{

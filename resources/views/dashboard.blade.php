@@ -3,228 +3,32 @@
 		<h2 class="font-semibold text-xl text-gray-800 leading-tight">
 			Tableau de bord
 		</h2>
+
+		<div class="flex items-center gap-1 text-sm text-gray-600">
+			<span>
+				Bonjour, {{ $user->first_name }} ! Passez une excellente journée
+			</span>
+
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke-width="1.5"
+				stroke="currentColor"
+				class="size-5 shrink-0"
+			>
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					d="M6.633 10.25c.806 0 1.533-.446 2.031-1.08a9.041 9.041 0 0 1 2.861-2.4c.723-.384 1.35-.956 1.653-1.715a4.498 4.498 0 0 0 .322-1.672V2.75a.75.75 0 0 1 .75-.75 2.25 2.25 0 0 1 2.25 2.25c0 1.152-.26 2.243-.723 3.218-.266.558.107 1.282.725 1.282m0 0h3.126c1.026 0 1.945.694 2.054 1.715.045.422.068.85.068 1.285a11.95 11.95 0 0 1-2.649 7.521c-.388.482-.987.729-1.605.729H13.48c-.483 0-.964-.078-1.423-.23l-3.114-1.04a4.501 4.501 0 0 0-1.423-.23H5.904m10.598-9.75H14.25M5.904 18.5c.083.205.173.405.27.602.197.4-.078.898-.523.898h-.908c-.889 0-1.713-.518-1.972-1.368a12 12 0 0 1-.521-3.507c0-1.553.295-3.036.831-4.398C3.387 9.953 4.167 9.5 5 9.5h1.053c.472 0 .745.556.5.96a8.958 8.958 0 0 0-1.302 4.665c0 1.194.232 2.333.654 3.375Z"
+				/>
+			</svg>
+		</div>
 	</x-slot>
 
-	<div class="py-12">
-		<div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-			<div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-				<div class="p-6 text-gray-900">
-					<header class="mb-8">
-						<h2 class="text-xl font-semibold text-gray-800">
-							Mes temps
-						</h2>
-
-						<p class="mt-1 text-sm text-gray-600">
-							Suivi de votre temps de travail pour la semaine en cours.
-						</p>
-					</header>
-
-					{{-- Résumé de la semaine --}}
-					<section aria-labelledby="week-summary-title" class="mb-8">
-						<h3 id="week-summary-title" class="sr-only">
-							Résumé de la semaine
-						</h3>
-
-						<div class="grid gap-4 sm:grid-cols-3">
-							{{-- Temps réalisé --}}
-							<div class="rounded-lg border border-gray-200 p-5">
-								<p class="text-sm font-medium text-gray-600">
-									Temps réalisé
-								</p>
-
-								<p class="mt-2 text-2xl font-semibold text-gray-900">
-									{{ intdiv($weeklyTimeSummary['total'], 60) }}h{{ str_pad($weeklyTimeSummary['total'] % 60, 2, '0', STR_PAD_LEFT) }}
-								</p>
-							</div>
-
-							@if($weeklyTimeSummary['is_hourly'])
-								{{-- Temps attendu --}}
-								<div class="rounded-lg border border-gray-200 p-5">
-									<p class="text-sm font-medium text-gray-600">
-										Temps attendu
-									</p>
-
-									<p class="mt-2 text-2xl font-semibold text-gray-900">
-										{{ $user->workSchedule->weekly_hours }}h
-									</p>
-								</div>
-
-								{{-- Écart --}}
-								<div class="rounded-lg border border-gray-200 p-5">
-									<p class="text-sm font-medium text-gray-600">
-										Écart
-									</p>
-
-									<p class="mt-2 text-2xl font-semibold text-gray-900">
-										@if($weeklyTimeSummary['difference'] > 0)
-											+{{ intdiv($weeklyTimeSummary['difference'], 60) }}h{{ str_pad($weeklyTimeSummary['difference'] % 60, 2, '0', STR_PAD_LEFT) }}
-										@elseif($weeklyTimeSummary['difference'] < 0)
-											-{{ intdiv(abs($weeklyTimeSummary['difference']), 60) }}h{{ str_pad(abs($weeklyTimeSummary['difference']) % 60, 2, '0', STR_PAD_LEFT) }}
-										@else
-											0h00
-										@endif
-									</p>
-								</div>
-							@else
-								{{-- Forfait --}}
-								<div class="rounded-lg border border-gray-200 p-5 sm:col-span-2">
-									<p class="text-sm font-medium text-gray-600">
-										Régime de travail
-									</p>
-
-									<p class="mt-2 text-2xl font-semibold text-gray-900">
-										Au forfait
-									</p>
-								</div>
-							@endif
-						</div>
-					</section>
-
-					{{-- Détail de la semaine --}}
-					<section aria-labelledby="week-details-title">
-
-						<div class="mb-4">
-							<h3
-								id="week-details-title"
-								class="text-lg font-semibold text-gray-800"
-							>
-								Détail de la semaine
-							</h3>
-						</div>
-
-						@if(count($weeklyTimeSummary['days']) > 0)
-							<div class="overflow-x-auto">
-								<table class="w-full text-left text-sm text-gray-600">
-									<caption class="sr-only">
-										Détail du temps de travail pour chaque journée de la semaine
-									</caption>
-
-									<thead class="border-b border-gray-200 text-xs uppercase text-gray-500">
-										<tr>
-											<th scope="col" class="px-4 py-3">
-												Jour
-											</th>
-
-											<th scope="col" class="px-4 py-3">
-												Périodes
-											</th>
-
-											<th scope="col" class="px-4 py-3">
-												Durée
-											</th>
-
-											@if($weeklyTimeSummary['is_hourly'])
-												<th scope="col" class="px-4 py-3">
-													Écart
-												</th>
-											@endif
-										</tr>
-									</thead>
-
-									<tbody class="divide-y divide-gray-200">
-										@foreach($weeklyTimeSummary['days'] as $day)
-											<tr>
-												{{-- Jour --}}
-												<th
-													scope="row"
-													class="px-4 py-4 font-medium text-gray-900 whitespace-nowrap align-top"
-												>
-													{{ $day['date']->translatedFormat('l d/m') }}
-												</th>
-
-												{{-- Périodes --}}
-												<td class="px-4 py-4 align-top">
-													@if(count($day['pairs']) > 0)
-														<ul class="space-y-1">
-															@foreach($day['pairs'] as $pair)
-																<li class="whitespace-nowrap">
-																	{{ $pair['in']->created_at->format('H:i') }}
-																	<span aria-hidden="true">→</span>
-																	{{ $pair['out']->created_at->format('H:i') }}
-																</li>
-															@endforeach
-														</ul>
-													@else
-														<span class="text-gray-500">
-															—
-														</span>
-													@endif
-
-													@if($day['has_anomaly'])
-														<p class="mt-2 font-medium text-red-700">
-															Attention : badgeage incomplet ou incohérent.
-														</p>
-													@endif
-												</td>
-
-												{{-- Durée --}}
-												<td class="px-4 py-4 font-medium text-gray-900 whitespace-nowrap align-top">
-													{{ intdiv($day['minutes'], 60) }}h{{ str_pad($day['minutes'] % 60, 2, '0', STR_PAD_LEFT) }}
-												</td>
-
-												@if($weeklyTimeSummary['is_hourly'])
-													{{-- Écart --}}
-													<td class="px-4 py-4 whitespace-nowrap align-top">
-														@if($day['difference'] > 0)
-															<span class="font-medium text-green-700">
-																+{{ intdiv($day['difference'], 60) }}h{{ str_pad($day['difference'] % 60, 2, '0', STR_PAD_LEFT) }}
-															</span>
-														@elseif($day['difference'] < 0)
-															<span class="font-medium text-red-700">
-																-{{ intdiv(abs($day['difference']), 60) }}h{{ str_pad(abs($day['difference']) % 60, 2, '0', STR_PAD_LEFT) }}
-															</span>
-														@else
-															<span class="font-medium text-gray-900">
-																0h00
-															</span>
-														@endif
-													</td>
-												@endif
-											</tr>
-										@endforeach
-									</tbody>
-
-									<tfoot class="border-t border-gray-300">
-										<tr>
-											<th
-												scope="row"
-												@if($weeklyTimeSummary['is_hourly'])
-													colspan="2"
-												@endif
-												class="px-4 py-4 text-right font-semibold text-gray-900"
-											>
-												Total
-											</th>
-
-											<td class="px-4 py-4 font-semibold text-gray-900">
-												{{ intdiv($weeklyTimeSummary['total'], 60) }}h{{ str_pad($weeklyTimeSummary['total'] % 60, 2, '0', STR_PAD_LEFT) }}
-											</td>
-
-											@if($weeklyTimeSummary['is_hourly'])
-												<td class="px-4 py-4 font-semibold text-gray-900">
-													@if($weeklyTimeSummary['difference'] > 0)
-														+{{ intdiv($weeklyTimeSummary['difference'], 60) }}h{{ str_pad($weeklyTimeSummary['difference'] % 60, 2, '0', STR_PAD_LEFT) }}
-													@elseif($weeklyTimeSummary['difference'] < 0)
-														-{{ intdiv(abs($weeklyTimeSummary['difference']), 60) }}h{{ str_pad(abs($weeklyTimeSummary['difference']) % 60, 2, '0', STR_PAD_LEFT) }}
-													@else
-														0h00
-													@endif
-												</td>
-											@endif
-										</tr>
-									</tfoot>
-								</table>
-							</div>
-						@else
-							<div class="rounded-lg border border-dashed border-gray-300 p-8 text-center">
-								<p class="text-sm text-gray-600">
-									Aucun temps enregistré pour cette semaine.
-								</p>
-							</div>
-						@endif
-					</section>
-				</div>
-			</div>
+	<div class="flex flex-col gap-y-6">
+		<div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+			<livewire:times />
 		</div>
 	</div>
 </x-app-layout>

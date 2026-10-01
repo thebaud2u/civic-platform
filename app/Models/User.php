@@ -105,32 +105,43 @@ class User extends Authenticatable
 		return $this->hasMany(Time::class);
 	}
 
+	public function users(): HasMany
+	{
+		return $this->hasMany(User::class, 'manager_id');
+	}
+
 	public function workSchedule(): BelongsTo
 	{
 		return $this->belongsTo(WorkSchedule::class);
 	}
 
+	public function workScheduleType(): BelongsTo
+	{
+		return $this->belongsTo(WorkScheduleType::class);
+	}
+
 	// Functions
-	public function timesOfWeek(?int $week = null): Collection
+	public function timesOfWeek(?int $weekNumber = null, ?int $year = null): Collection
 	{
 		$date = Carbon::now();
 
-		if ($week) {
-			$date->setISODate($date->year, $week);
+		if ($weekNumber) {
+			if ($year) $date->setISODate($year, $weekNumber);
+			else $date->setISODate($date->year, $week);
 		}
 
 		$startOfWeek = $date->startOfWeek();
 		$endOfWeek = $date->copy()->endOfWeek();
 
 		return $this->times()
-			->whereBetween('created_at', [$startOfWeek, $endOfWeek])
+			->whereBetween('date', [$startOfWeek, $endOfWeek])
 			->get();
 	}
 
-	public function weeklyTimeSummary(?int $week = null): array
+	public function weeklyTimeSummary(?int $weekNumber = null, ?int $year = null, ): array
 	{
-		$times = $this->timesOfWeek($week)
-			->sortBy('created_at');
+		$times = $this->timesOfWeek($weekNumber, $year)
+			->sortBy('date');
 
 		$weeklyHours = $this->workSchedule->weekly_hours;
 
@@ -156,14 +167,14 @@ class User extends Authenticatable
 
 			if ($time->way === 'out' && $in) {
 				// Le OUT doit être le même jour que le IN.
-				if ($in->created_at->isSameDay($time->created_at)) {
-					$minutes = $in->created_at->diffInMinutes($time->created_at);
+				if ($in->date->isSameDay($time->date)) {
+					$minutes = $in->date->diffInMinutes($time->date);
 
-					$date = $in->created_at->format('Y-m-d');
+					$date = $in->date->format('Y-m-d');
 
 					if (!isset($daily[$date])) {
 						$daily[$date] = [
-							'date' => $in->created_at,
+							'date' => $in->date,
 							'pairs' => [],
 							'minutes' => 0,
 							'has_anomaly' => false,
@@ -181,11 +192,11 @@ class User extends Authenticatable
 				} else {
 					// Le OUT est le lendemain ou un autre jour :
 					// la période est considérée comme invalide.
-					$date = $in->created_at->format('Y-m-d');
+					$date = $in->date->format('Y-m-d');
 
 					if (!isset($daily[$date])) {
 						$daily[$date] = [
-							'date' => $in->created_at,
+							'date' => $in->date,
 							'pairs' => [],
 							'minutes' => 0,
 							'has_anomaly' => false,
@@ -194,11 +205,11 @@ class User extends Authenticatable
 
 					$daily[$date]['has_anomaly'] = true;
 
-					$outDate = $time->created_at->format('Y-m-d');
+					$outDate = $time->date->format('Y-m-d');
 
 					if (!isset($daily[$outDate])) {
 						$daily[$outDate] = [
-							'date' => $time->created_at,
+							'date' => $time->date,
 							'pairs' => [],
 							'minutes' => 0,
 							'has_anomaly' => false,
@@ -214,11 +225,11 @@ class User extends Authenticatable
 
 		// Un IN sans OUT à la fin de la période.
 		if ($in) {
-			$date = $in->created_at->format('Y-m-d');
+			$date = $in->date->format('Y-m-d');
 
 			if (!isset($daily[$date])) {
 				$daily[$date] = [
-					'date' => $in->created_at,
+					'date' => $in->date,
 					'pairs' => [],
 					'minutes' => 0,
 					'has_anomaly' => false,

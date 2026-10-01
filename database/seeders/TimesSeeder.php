@@ -85,8 +85,7 @@ class TimesSeeder extends Seeder
 		Time::create([
 			'user_id' => $user->id,
 			'way' => $way,
-			'created_at' => $date,
-			'updated_at' => $date,
+			'date' => $date,
 		]);
 	}
 }

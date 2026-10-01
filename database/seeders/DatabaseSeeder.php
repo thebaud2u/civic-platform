@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
 			RolesAndPermissionsSeeder::class,
 			ContractTypesSeeder::class,
 			WorkSchedulesSeeder::class,
+			WorkScheduleTypesSeeder::class,
 			ServicesSeeder::class,
 			UsersSeeder::class,
 			TimesSeeder::class,

@@ -14,7 +14,9 @@ return new class extends Migration
 		Schema::create('times', function (Blueprint $table) {
 			$table->id();
 			$table->foreignId('user_id')->constrained()->cascadeOnDelete();
+			$table->foreignId('manager_id')->nullable()->constrained('users')->nullOnDelete();
 			$table->enum('way', ['in', 'out']);
+			$table->datetime('date');
 			$table->timestamps();
 		});
 	}

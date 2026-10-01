@@ -13,11 +13,9 @@ class DashboardController extends Controller
 	public function index(): View
 	{
 		$user = Auth::guard('web')->user();
-		$weeklyTimeSummary = $user->weeklyTimeSummary();
 
 		return view('dashboard', compact(
-			'user',
-			'weeklyTimeSummary'
+			'user'
 		));
 	}
 }

@@ -13,19 +13,13 @@ class Services extends Component
 	public Service $service;
 
 	// Properties
-	public $name;
-	public $description;
-	public $managerSelected;
+	public string $name = '';
+	public string $description = '';
+	public string $managerSelected = '';
 
 	// Criterias
-	public $manager;
-	public $keyword;
-
-	protected function rules() {
-		return [
-			'name' => []
-		];
-	}
+	public string $manager = '';
+	public string $keyword = '';
 
 	public function getService($slug, $modal)
 	{

@@ -14,6 +14,7 @@ return new class extends Migration
 		Schema::table('users', function (Blueprint $table) {
 			$table->foreign('contract_type_id')->references('id')->on('contract_types')->nullOnDelete();
 			$table->foreign('work_schedule_id')->references('id')->on('work_schedules')->nullOnDelete();
+			$table->foreign('work_schedule_type_id')->references('id')->on('work_schedule_types')->nullOnDelete();
 			$table->foreign('service_id')->references('id')->on('services')->nullOnDelete();
 		});
 	}
@@ -24,7 +25,7 @@ return new class extends Migration
 	public function down(): void
 	{
 		Schema::table('users', function (Blueprint $table) {
-			$table->dropForeign(['service_id', 'work_schedule_id', 'contract_types']);
+			$table->dropForeign(['service_id', 'work_schedule_id', 'work_schedule_type_id', 'contract_types']);
 		});
 	}
 };

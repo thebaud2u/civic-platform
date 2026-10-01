@@ -26,6 +26,7 @@ return new class extends Migration
 			$table->json('values')->nullable();
 			$table->foreignId('contract_type_id')->nullable();
 			$table->foreignId('work_schedule_id')->nullable();
+			$table->foreignId('work_schedule_type_id')->nullable();
 			$table->foreignId('service_id')->nullable();
 			$table->foreignId('manager_id')->nullable()->constrained('users')->nullOnDelete();
 			$table->timestamp('last_logon')->nullable();
