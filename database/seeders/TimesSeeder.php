@@ -38,7 +38,6 @@ class TimesSeeder extends Seeder
 		 */
 		$tuesday = $startOfWeek->copy()->addDay();
 
-		$this->createTime($user, $tuesday->copy()->setTime(8, 0), 'out');
 		$this->createTime($user, $tuesday->copy()->setTime(9, 0), 'in');
 		$this->createTime($user, $tuesday->copy()->setTime(12, 5), 'out');
 		$this->createTime($user, $tuesday->copy()->setTime(13, 2), 'in');
