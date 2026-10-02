@@ -37,7 +37,7 @@
 
 				<x-primary-button
 					wire:click="fresh"
-					x-on:click.prevent="$dispatch('open-modal', 'fix-anomaly-form');"
+					x-on:click.prevent="$dispatch('open-modal', 'fix-form');"
 				>
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
@@ -59,20 +59,20 @@
 				</x-primary-button>
 			</div>
 
-			{{-- Modal fix anomaly form --}}
+			{{-- Modal fix form --}}
 			<x-modal
-				name="fix-anomaly-form"
-				labelledby="fix-anomaly-form-title"
+				name="fix-form"
+				labelledby="fix-form-title"
 				focusable
 			>
 				<section class="p-6 sm:p-8">
 					<header>
-						<h2 id="fix-anomaly-form-title" class="text-lg font-semibold text-gray-900">
-							Corriger une anomalie
+						<h2 id="fix-form-title" class="text-lg font-semibold text-gray-900">
+							Ajouter un badgeage
 						</h2>
 					</header>
 
-					<form wire:submit.prevent="anomalyForm" class="flex flex-col mt-6 space-y-5">
+					<form wire:submit.prevent="fixForm" class="flex flex-col mt-6 space-y-5">
 						{{-- Date --}}
 						<div>
 							<x-input-label for="date" value="Date" :required="true" />
@@ -138,8 +138,8 @@
 						<div class="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
 							<x-cancel-button />
 
-							<x-validate-button @anomaly-form-complete.window="$dispatch('close')">
-								Corriger l'anomalie
+							<x-validate-button @fix-form-complete.window="$dispatch('close')">
+								Ajouter le badgeage
 							</x-validate-button>
 						</div>
 					</form>
@@ -238,9 +238,13 @@
 
 					<p class="mt-2 text-2xl font-semibold text-gray-900">
 						@if($weeklyTimeSummary['difference'] > 0)
-							+{{ intdiv($weeklyTimeSummary['difference'], 60) }}h{{ str_pad($weeklyTimeSummary['difference'] % 60, 2, '0', STR_PAD_LEFT) }}
+							<span class="font-medium text-green-700">
+								+{{ intdiv($weeklyTimeSummary['difference'], 60) }}h{{ str_pad($weeklyTimeSummary['difference'] % 60, 2, '0', STR_PAD_LEFT) }}
+							</span>
 						@elseif($weeklyTimeSummary['difference'] < 0)
-							-{{ intdiv(abs($weeklyTimeSummary['difference']), 60) }}h{{ str_pad(abs($weeklyTimeSummary['difference']) % 60, 2, '0', STR_PAD_LEFT) }}
+							<span class="font-medium text-red-700">
+								-{{ intdiv(abs($weeklyTimeSummary['difference']), 60) }}h{{ str_pad(abs($weeklyTimeSummary['difference']) % 60, 2, '0', STR_PAD_LEFT) }}
+							</span>
 						@else
 							0h00
 						@endif
@@ -273,127 +277,130 @@
 		</div>
 
 		@if(count($weeklyTimeSummary['days']) > 0)
-			<div class="overflow-x-auto">
-				<table class="w-full text-left text-sm text-gray-600">
-					<caption class="sr-only">
-						Détail du temps de travail pour chaque journée de la semaine
-					</caption>
+			<div class="space-y-4">
+				<h3 class="sr-only">
+					Détail du temps de travail pour chaque journée de la semaine
+				</h3>
 
-					<thead class="border-b border-gray-200 text-xs uppercase text-gray-500">
-						<tr>
-							<th scope="col" class="px-4 py-3">
-								Jour
-							</th>
+				{{-- Mobile : empilé / md+ : une colonne par jour --}}
+				<ul class="grid gap-3 md:grid-flow-col md:auto-cols-[minmax(9rem,1fr)] overflow-x-auto">
+					@foreach($weeklyTimeSummary['days'] as $day)
+						<li @class([
+								'flex flex-col rounded-lg bg-white text-sm text-gray-600',
+								'border border-gray-200' => !$day['date']->isToday(),
+								'border-2 border-primary-700' => $day['date']->isToday(),
+							])
+						>
+							{{-- Day --}}
+							<div class="border-b border-gray-200 px-4 py-3 font-medium text-gray-900 whitespace-nowrap">
+								{{ $day['date']->translatedFormat('l d/m') }}
+							</div>
 
-							<th scope="col" class="px-4 py-3">
-								Périodes
-							</th>
+							{{-- Periods --}}
+							<div class="flex-1 px-4 py-3">
+								@if(count($day['pairs']) > 0)
+									<ul class="space-y-1">
+										@foreach($day['pairs'] as $pair)
+											<li class="whitespace-nowrap">
+												<span
+													@class([
+														'',
+														'text-green-700 font-semibold' => $pair['in']['source'] == 'chef de service',
+														'text-green-700 font-semibold cursor-pointer' => $pair['in']['source'] == 'chef de service' && Auth::user()->hasRole('chef de service'),
+													])
+													@role('chef de service') title="Supprimer la correction" wire:click="removeFix({{ $pair['in']['id'] }})" @endrole
+												>
+													{{ $pair['in']['hour'] }}
+												</span>
 
-							<th scope="col" class="px-4 py-3">
-								Durée
-							</th>
+												<span aria-hidden="true">
+													→
+												</span>
 
-							@if($weeklyTimeSummary['is_hourly'])
-								<th scope="col" class="px-4 py-3">
-									Écart
-								</th>
-							@endif
-						</tr>
-					</thead>
+												@if(!is_null($pair['out']))
+													<span
+														@class([
+															'',
+															'text-green-700 font-semibold' => $pair['out']['source'] == 'chef de service',
+															'text-green-700 font-semibold cursor-pointer' => $pair['out']['source'] == 'chef de service' && Auth::user()->hasRole('chef de service'),
+														])
+														@role('chef de service') title="Supprimer la correction" wire:click="removeFix({{ $pair['out']['id'] }})" @endrole
+													>
+														{{ $pair['out']['hour'] }}
+													</span>
+												@else
+													<span class="font-medium text-red-700">
+														Badgeage manquant
+													</span>
+												@endif
+											</li>
+										@endforeach
+									</ul>
+								@else
+									<span class="text-gray-500">—</span>
+								@endif
+							</div>
 
-					<tbody class="divide-y divide-gray-200">
-						@foreach($weeklyTimeSummary['days'] as $day)
-							<tr>
-								{{-- Day --}}
-								<th
-									scope="row"
-									class="px-4 py-4 font-medium text-gray-900 whitespace-nowrap align-top"
-								>
-									{{ $day['date']->translatedFormat('l d/m') }}
-								</th>
-
-								{{-- Periods --}}
-								<td class="px-4 py-4 align-top">
-									@if(count($day['pairs']) > 0)
-										<ul class="space-y-1">
-											@foreach($day['pairs'] as $pair)
-												<li class="whitespace-nowrap">
-													{{ $pair['in']->date->format('H:i') }}
-													<span aria-hidden="true">→</span>
-													{{ $pair['out']->date->format('H:i') }}
-												</li>
-											@endforeach
-										</ul>
-									@else
-										<span class="text-gray-500">
-											—
-										</span>
-									@endif
-
-									@if($day['has_anomaly'])
-										<p class="mt-2 font-medium text-red-700">
-											Attention : badgeage incomplet ou incohérent.
-										</p>
-									@endif
-								</td>
-
-								{{-- Duration --}}
-								<td class="px-4 py-4 font-medium text-gray-900 whitespace-nowrap align-top">
-									{{ intdiv($day['minutes'], 60) }}h{{ str_pad($day['minutes'] % 60, 2, '0', STR_PAD_LEFT) }}
-								</td>
+							{{-- Duration / Difference --}}
+							<dl class="space-y-1 border-t border-gray-200 px-4 py-3">
+								<div class="flex items-center justify-between gap-2">
+									<dt class="text-xs uppercase text-gray-500">Durée</dt>
+									<dd class="font-medium text-gray-900 whitespace-nowrap">
+										{{ intdiv($day['minutes'], 60) }}h{{ str_pad($day['minutes'] % 60, 2, '0', STR_PAD_LEFT) }}
+									</dd>
+								</div>
 
 								@if($weeklyTimeSummary['is_hourly'])
-									{{-- Difference --}}
-									<td class="px-4 py-4 whitespace-nowrap align-top">
-										@if($day['difference'] > 0)
-											<span class="font-medium text-green-700">
-												+{{ intdiv($day['difference'], 60) }}h{{ str_pad($day['difference'] % 60, 2, '0', STR_PAD_LEFT) }}
-											</span>
-										@elseif($day['difference'] < 0)
-											<span class="font-medium text-red-700">
-												-{{ intdiv(abs($day['difference']), 60) }}h{{ str_pad(abs($day['difference']) % 60, 2, '0', STR_PAD_LEFT) }}
-											</span>
-										@else
-											<span class="font-medium text-gray-900">
-												0h00
-											</span>
-										@endif
-									</td>
+									<div class="flex items-center justify-between gap-2">
+										<dt class="text-xs uppercase text-gray-500">Écart</dt>
+										<dd class="whitespace-nowrap">
+											@if($day['difference'] > 0)
+												<span class="font-medium text-green-700">
+													+{{ intdiv($day['difference'], 60) }}h{{ str_pad($day['difference'] % 60, 2, '0', STR_PAD_LEFT) }}
+												</span>
+											@elseif($day['difference'] < 0)
+												<span class="font-medium text-red-700">
+													-{{ intdiv(abs($day['difference']), 60) }}h{{ str_pad(abs($day['difference']) % 60, 2, '0', STR_PAD_LEFT) }}
+												</span>
+											@else
+												<span class="font-medium text-gray-900">0h00</span>
+											@endif
+										</dd>
+									</div>
 								@endif
-							</tr>
-						@endforeach
-					</tbody>
+							</dl>
+						</li>
+					@endforeach
+				</ul>
 
-					<tfoot class="border-t border-gray-300">
-						<tr>
-							<th
-								scope="row"
-								@if($weeklyTimeSummary['is_hourly'])
-									colspan="2"
-								@endif
-								class="px-4 py-4 text-right font-semibold text-gray-900"
-							>
-								Total
-							</th>
+				{{-- Total --}}
+				<dl class="flex flex-wrap items-center justify-end gap-x-8 gap-y-1 rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm font-semibold text-gray-900">
+					<div class="flex items-center gap-2">
+						<dt>Total</dt>
+						<dd>
+							{{ intdiv($weeklyTimeSummary['total'], 60) }}h{{ str_pad($weeklyTimeSummary['total'] % 60, 2, '0', STR_PAD_LEFT) }}
+						</dd>
+					</div>
 
-							<td class="px-4 py-4 font-semibold text-gray-900">
-								{{ intdiv($weeklyTimeSummary['total'], 60) }}h{{ str_pad($weeklyTimeSummary['total'] % 60, 2, '0', STR_PAD_LEFT) }}
-							</td>
-
-							@if($weeklyTimeSummary['is_hourly'])
-								<td class="px-4 py-4 font-semibold text-gray-900">
-									@if($weeklyTimeSummary['difference'] > 0)
+					@if($weeklyTimeSummary['is_hourly'])
+						<div class="flex items-center gap-2">
+							<dt>Écart</dt>
+							<dd>
+								@if($weeklyTimeSummary['difference'] > 0)
+									<span class="font-medium text-green-700">
 										+{{ intdiv($weeklyTimeSummary['difference'], 60) }}h{{ str_pad($weeklyTimeSummary['difference'] % 60, 2, '0', STR_PAD_LEFT) }}
-									@elseif($weeklyTimeSummary['difference'] < 0)
+									</span>
+								@elseif($weeklyTimeSummary['difference'] < 0)
+									<span class="font-medium text-red-700">
 										-{{ intdiv(abs($weeklyTimeSummary['difference']), 60) }}h{{ str_pad(abs($weeklyTimeSummary['difference']) % 60, 2, '0', STR_PAD_LEFT) }}
-									@else
-										0h00
-									@endif
-								</td>
-							@endif
-						</tr>
-					</tfoot>
-				</table>
+									</span>
+								@else
+									0h00
+								@endif
+							</dd>
+						</div>
+					@endif
+				</dl>
 			</div>
 		@else
 			<div class="rounded-lg border border-dashed border-gray-300 p-8 text-center">

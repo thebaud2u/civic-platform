@@ -25,7 +25,7 @@ class Times extends Component
 	public int $weekNumber;
 	public int $year;
 
-	public function anomalyForm()
+	public function fixForm()
 	{
 		$rules = [
 			'date' => ['required', 'date_format:Y-m-d\TH:i'],
@@ -50,10 +50,19 @@ class Times extends Component
 			'user_id' => $this->userSelected
 				? User::findBySlug($this->userSelected)?->id
 				: null,
-			'manager_id' => $this->user->id
+			'manager_id' => Auth::user()->id
 		]);
 
-		$this->dispatch('anomaly-form-complete');
+		$this->dispatch('fix-form-complete');
+	}
+
+	public function removeFix($id)
+	{
+		$time = Time::find($id);
+
+		if ($time) {
+			$time->delete();
+		}
 	}
 
 	public function previousWeek()

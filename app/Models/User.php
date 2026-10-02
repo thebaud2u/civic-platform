@@ -138,7 +138,7 @@ class User extends Authenticatable
 			->get();
 	}
 
-	public function weeklyTimeSummary(?int $weekNumber = null, ?int $year = null, ): array
+	public function weeklyTimeSummary(?int $weekNumber = null, ?int $year = null): array
 	{
 		$times = $this->timesOfWeek($weekNumber, $year)
 			->sortBy('date');
@@ -155,75 +155,74 @@ class User extends Authenticatable
 
 		$totalMinutes = 0;
 		$daily = [];
-
 		$in = null;
 
 		foreach ($times as $time) {
 			if ($time->way === 'in') {
+				if ($in) {
+					$date = $in->date->format('Y-m-d');
+
+					if (!isset($daily[$date])) {
+						$daily[$date] = [
+							'date' => $in->date,
+							'pairs' => [],
+							'minutes' => 0,
+						];
+					}
+
+					$daily[$date]['pairs'][] = [
+						'in' => [
+							'id' => $in->id,
+							'hour' => $in->date->format('H:i'),
+							'source' => $in->manager ? 'chef de service' : 'agent',
+						],
+						'out' => null,
+					];
+
+					$daily[$date]['minutes'] += $minutes;
+
+					$totalMinutes += $minutes;
+				}
+
 				$in = $time;
 
 				continue;
 			}
 
 			if ($time->way === 'out' && $in) {
-				// Le OUT doit être le même jour que le IN.
-				if ($in->date->isSameDay($time->date)) {
-					$minutes = $in->date->diffInMinutes($time->date);
+				$minutes = $in->date->diffInMinutes($time->date);
 
-					$date = $in->date->format('Y-m-d');
+				$date = $in->date->format('Y-m-d');
 
-					if (!isset($daily[$date])) {
-						$daily[$date] = [
-							'date' => $in->date,
-							'pairs' => [],
-							'minutes' => 0,
-							'has_anomaly' => false,
-						];
-					}
-
-					$daily[$date]['pairs'][] = [
-						'in' => $in,
-						'out' => $time,
+				if (!isset($daily[$date])) {
+					$daily[$date] = [
+						'date' => $in->date,
+						'pairs' => [],
+						'minutes' => 0,
 					];
-
-					$daily[$date]['minutes'] += $minutes;
-
-					$totalMinutes += $minutes;
-				} else {
-					// Le OUT est le lendemain ou un autre jour :
-					// la période est considérée comme invalide.
-					$date = $in->date->format('Y-m-d');
-
-					if (!isset($daily[$date])) {
-						$daily[$date] = [
-							'date' => $in->date,
-							'pairs' => [],
-							'minutes' => 0,
-							'has_anomaly' => false,
-						];
-					}
-
-					$daily[$date]['has_anomaly'] = true;
-
-					$outDate = $time->date->format('Y-m-d');
-
-					if (!isset($daily[$outDate])) {
-						$daily[$outDate] = [
-							'date' => $time->date,
-							'pairs' => [],
-							'minutes' => 0,
-							'has_anomaly' => false,
-						];
-					}
-
-					$daily[$outDate]['has_anomaly'] = true;
 				}
+
+				$daily[$date]['pairs'][] = [
+					'in' => [
+						'id' => $in->id,
+						'hour' => $in->date->format('H:i'),
+						'source' => $in->manager ? 'chef de service' : 'agent',
+					],
+					'out' => [
+						'id' => $time->id,
+						'hour' => $time->date->format('H:i'),
+						'source' => $time->manager ? 'chef de service' : 'agent',
+					],
+				];
+
+				$daily[$date]['minutes'] += $minutes;
+
+				$totalMinutes += $minutes;
 
 				$in = null;
 			}
 		}
 
-		// Un IN sans OUT à la fin de la période.
 		if ($in) {
 			$date = $in->date->format('Y-m-d');
 
@@ -232,11 +231,21 @@ class User extends Authenticatable
 					'date' => $in->date,
 					'pairs' => [],
 					'minutes' => 0,
-					'has_anomaly' => false,
 				];
 			}
 
-			$daily[$date]['has_anomaly'] = true;
+			$daily[$date]['pairs'][] = [
+				'in' => [
+					'id' => $in->id,
+					'hour' => $in->date->format('H:i'),
+					'source' => $in->manager ? 'chef de service' : 'agent',
+				],
+				'out' => null,
+			];
+
+			$daily[$date]['minutes'] += $minutes;
+
+			$totalMinutes += $minutes;
 		}
 
 		foreach ($daily as &$day) {
