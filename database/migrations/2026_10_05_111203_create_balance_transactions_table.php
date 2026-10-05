@@ -15,6 +15,7 @@ return new class extends Migration
 			$table->foreignId('balance_id')->constrained()->cascadeOnDelete();
 			$table->foreignId('request_id')->nullable()->constrained()->cascadeOnDelete();
 			$table->string('type')->default(RequestTypes::DayOff->value);
+			$table->date('date');
 			$table->unsignedInteger('minutes');
 			$table->enum('way', ['plus', 'minus']);
 			$table->timestamps();

@@ -15,6 +15,8 @@ return new class extends Migration
 			$table->string('type')->default(RequestTypes::DayOff->value);
 			$table->integer('minutes')->default(0);
 			$table->timestamps();
+
+			$table->unique(['user_id', 'type']);
 		});
 	}
 

@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Observers\UserObserver;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Casts\AsCollection;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -37,6 +39,7 @@ use Spatie\Sluggable\SlugOptions;
 	'last_logon'
 ])]
 #[Hidden(['password', 'remember_token'])]
+#[ObservedBy(UserObserver::class)]
 class User extends Authenticatable
 {
 	use HasRoles, HasSlug, Notifiable, SoftDeletes;
@@ -128,12 +131,16 @@ class User extends Authenticatable
 	// Functions
 	public function dayOffBalance(): ?Balance
 	{
-		return $this->balances()->where('type', RequestTypes::DayOff->value)->first();
+		return $this->balances()
+			->where('type', RequestTypes::DayOff->value)
+			->firstOrFail();
 	}
 
 	public function recoveryBalance(): ?Balance
 	{
-		return $this->balances()->where('type', RequestTypes::Recovery->value)->first();
+		return $this->balances()
+        	->where('type', RequestTypes::Recovery->value)
+       		->firstOrFail();
 	}
 
 	public function timeOfDay(?Carbon $date): null|double
