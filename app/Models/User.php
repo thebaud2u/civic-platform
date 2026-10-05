@@ -80,6 +80,11 @@ class User extends Authenticatable
 	}
 
 	// Relations
+	public function balances(): HasMany
+	{
+		return $this->hasMany(Balance::class);
+	}
+
 	public function contractType(): BelongsTo
 	{
 		return $this->belongsTo(ContractType::class);
@@ -121,6 +126,56 @@ class User extends Authenticatable
 	}
 
 	// Functions
+	public function dayOffBalance(): ?Balance
+	{
+		return $this->balances()->where('type', RequestTypes::DayOff->value)->first();
+	}
+
+	public function recoveryBalance(): ?Balance
+	{
+		return $this->balances()->where('type', RequestTypes::Recovery->value)->first();
+	}
+
+	public function timeOfDay(?Carbon $date): null|double
+	{
+		$times = $this->times()->where('date', 'LIKE', $date->format('Y-m-d').'%')
+			->get();
+
+		if ($times->isNotEmpty()) {
+			$weeklyHours = $this->workSchedule->weekly_hours;
+
+			$expectedMinutes = $weeklyHours !== null
+				? $weeklyHours * 60
+				: null;
+
+			$dailyExpectedMinutes = $weeklyHours !== null
+				? intdiv($expectedMinutes, 5)
+				: null;
+
+			$totalMinutes = 0;
+			$in = null;
+			foreach ($times as $time) {
+				if ($time->way === 'in') {
+					$in = $timle;
+					continue;
+				}
+
+				if ($time->way === 'out' && $in) {
+					$totalMinutes += $in->date->diffInMinutes($time->date);
+					$in = null;
+				}
+			}
+
+			if ($in) {
+				$totalMinutes += $minutes;
+			}
+
+			return $expectedMinutes !== null
+					? $totalMinutes - $expectedMinutes
+					: null;
+		}
+	}
+
 	public function timesOfWeek(?int $weekNumber = null, ?int $year = null): Collection
 	{
 		$date = Carbon::now();
