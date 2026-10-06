@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\RequestTypes;
 use App\Observers\UserObserver;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
@@ -93,14 +94,26 @@ class User extends Authenticatable
 		return $this->belongsTo(ContractType::class);
 	}
 
+	public function dayOffBalance(): HasOne
+	{
+		return $this->hasOne(Balance::class)
+			->where('type', RequestTypes::DayOff->value);
+	}
+
 	public function manager(): BelongsTo
 	{
 		return $this->belongsTo(User::class, 'manager_id');
 	}
 
-	public function managedService(): HasOne
+	public function managedService(): HasMany
 	{
-		return $this->hasOne(Service::class, 'manager_id');
+		return $this->hasMany(Service::class, 'manager_id');
+	}
+
+	public function recoveryBalance(): HasOne
+	{
+		return $this->hasOne(Balance::class)
+			->where('type', RequestTypes::Recovery->value);
 	}
 
 	public function service(): BelongsTo
@@ -129,58 +142,37 @@ class User extends Authenticatable
 	}
 
 	// Functions
-	public function dayOffBalance(): ?Balance
+	public function timeOfDay(Carbon $date): ?int
 	{
-		return $this->balances()
-			->where('type', RequestTypes::DayOff->value)
-			->firstOrFail();
-	}
+		$times = $this->times()
+			->where('date', 'LIKE', $date->format('Y-m-d') . '%')
+			->get()
+			->sortBy('date');
 
-	public function recoveryBalance(): ?Balance
-	{
-		return $this->balances()
-        	->where('type', RequestTypes::Recovery->value)
-       		->firstOrFail();
-	}
+		$weeklyHours = $this->workSchedule->weekly_hours;
 
-	public function timeOfDay(?Carbon $date): null|double
-	{
-		$times = $this->times()->where('date', 'LIKE', $date->format('Y-m-d').'%')
-			->get();
-
-		if ($times->isNotEmpty()) {
-			$weeklyHours = $this->workSchedule->weekly_hours;
-
-			$expectedMinutes = $weeklyHours !== null
-				? $weeklyHours * 60
-				: null;
-
-			$dailyExpectedMinutes = $weeklyHours !== null
-				? intdiv($expectedMinutes, 5)
-				: null;
-
-			$totalMinutes = 0;
-			$in = null;
-			foreach ($times as $time) {
-				if ($time->way === 'in') {
-					$in = $timle;
-					continue;
-				}
-
-				if ($time->way === 'out' && $in) {
-					$totalMinutes += $in->date->diffInMinutes($time->date);
-					$in = null;
-				}
-			}
-
-			if ($in) {
-				$totalMinutes += $minutes;
-			}
-
-			return $expectedMinutes !== null
-					? $totalMinutes - $expectedMinutes
-					: null;
+		if ($weeklyHours === null) {
+			return null;
 		}
+
+		$dailyExpectedMinutes = intdiv($weeklyHours * 60, 5);
+
+		$totalMinutes = 0;
+		$in = null;
+
+		foreach ($times as $time) {
+			if ($time->way === 'in') {
+				$in = $time;
+				continue;
+			}
+
+			if ($time->way === 'out' && $in) {
+				$totalMinutes += (int) $in->date->diffInMinutes($time->date);
+				$in = null;
+			}
+		}
+
+		return $totalMinutes - $dailyExpectedMinutes;
 	}
 
 	public function timesOfWeek(?int $weekNumber = null, ?int $year = null): Collection
@@ -189,7 +181,7 @@ class User extends Authenticatable
 
 		if ($weekNumber) {
 			if ($year) $date->setISODate($year, $weekNumber);
-			else $date->setISODate($date->year, $week);
+			else $date->setISODate($date->isoWeekYear, $weekNumber);
 		}
 
 		$startOfWeek = $date->startOfWeek();
@@ -240,10 +232,6 @@ class User extends Authenticatable
 						],
 						'out' => null,
 					];
-
-					$daily[$date]['minutes'] += $minutes;
-
-					$totalMinutes += $minutes;
 				}
 
 				$in = $time;
@@ -252,7 +240,7 @@ class User extends Authenticatable
 			}
 
 			if ($time->way === 'out' && $in) {
-				$minutes = $in->date->diffInMinutes($time->date);
+				$minutes = (int) $in->date->diffInMinutes($time->date);
 
 				$date = $in->date->format('Y-m-d');
 
@@ -304,10 +292,6 @@ class User extends Authenticatable
 				],
 				'out' => null,
 			];
-
-			$daily[$date]['minutes'] += $minutes;
-
-			$totalMinutes += $minutes;
 		}
 
 		foreach ($daily as &$day) {

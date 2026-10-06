@@ -11,11 +11,11 @@ return new class extends Migration
 	{
 		Schema::create('balance_transactions', function (Blueprint $table) {
 			$table->id();
-			$table->foreignId('user_id')->constrained()->cascadeOnDelete();
+			$table->foreignId('user_id')->nullable()->constrained()->cascadeOnDelete();
 			$table->foreignId('balance_id')->constrained()->cascadeOnDelete();
 			$table->foreignId('request_id')->nullable()->constrained()->cascadeOnDelete();
 			$table->string('type')->default(RequestTypes::DayOff->value);
-			$table->date('date');
+			$table->date('date')->nullable();
 			$table->unsignedInteger('minutes');
 			$table->enum('way', ['plus', 'minus']);
 			$table->timestamps();

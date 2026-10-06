@@ -32,4 +32,24 @@ class WorkSchedule extends Model
 	{
 		return $this->hasMany(User::class, 'work_schedule_id');
 	}
+
+	// Functions
+	public function dailyMinutes(): int
+	{
+		return $this->weekly_hours !== null
+			? (int) round($this->weekly_hours / 5 * 60)
+			: 420;
+	}
+
+	public function formatMinutes(int $minutes): string
+	{
+		$sign = $minutes < 0 ? '-' : '';
+		$minutes = abs($minutes);
+
+		$daily = $this->dailyMinutes();
+		$days = intdiv($minutes, $daily);
+		$rest = $minutes % $daily;
+
+		return $sign . trim(sprintf('%dj %dh%02d', $days, intdiv($rest, 60), $rest % 60));
+	}
 }

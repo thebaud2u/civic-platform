@@ -17,6 +17,7 @@ return new class extends Migration
 			$table->string('description')->nullable();
 			$table->string('slug');
 			$table->foreignId('manager_id')->nullable()->constrained('users')->nullOnDelete();
+			$table->foreignId('parent_service_id')->nullable()->references('id')->on('services')->nullOnDelete();
 			$table->timestamps();
 			$table->softDeletes();
 		});

@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 
-#[Fillable(['name', 'description', 'slug', 'manager_id'])]
+#[Fillable(['name', 'description', 'slug', 'manager_id', 'parent_service_id'])]
 class Service extends Model
 {
 	use SoftDeletes, HasSlug;
@@ -26,7 +26,7 @@ class Service extends Model
 		'deleted_at' => 'datetime'
 	];
 
-    // Tools
+	// Tools
 	/**
 	 * Get the options for generating the slug.
 	 *
@@ -39,14 +39,24 @@ class Service extends Model
 			->generateSlugsFrom('name');
 	}
 
-    // Relations
+	// Relations
+	public function childrenServices(): HasMany
+	{
+		return $this->hasMany(Service::class, 'parent_service_id');
+	}
+
 	public function manager(): BelongsTo
 	{
 		return $this->belongsTo(User::class, 'manager_id');
 	}
 
-    public function users(): HasMany
-    {
-        return $this->hasMany(User::class);
-    }
+	public function parentService(): BelongsTo
+	{
+		return $this->belongsTo(Service::class, 'parent_service_id');
+	}
+
+	public function users(): HasMany
+	{
+		return $this->hasMany(User::class);
+	}
 }

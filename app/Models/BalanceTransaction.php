@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 	'user_id',
 	'request_id',
 	'type',
+	'date',
 	'minutes',
 	'way'
 ])]

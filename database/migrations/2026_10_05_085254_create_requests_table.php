@@ -1,6 +1,6 @@
 <?php
 
-use App\Enums\RequestStatus;
+use App\Enums\{RequestStatus, RequestTypes};
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;

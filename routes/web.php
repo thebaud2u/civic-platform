@@ -15,6 +15,7 @@ Route::middleware('auth')->group(function () {
 
 	Route::controller(DashboardController::class)->group(function () {
 		Route::get('/tableau-de-bord', 'index')->name('dashboard'); // dashboard
+		Route::get('/demandes', 'requests')->name('requests'); // requests
 	});
 });
 

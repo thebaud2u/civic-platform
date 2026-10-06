@@ -114,7 +114,10 @@ class Times extends Component
 
 	public function render()
 	{
-		if($this->filterUserSelected) $this->user = User::findBySlug($this->filterUserSelected);
+		if ($this->filterUserSelected) {
+			$this->user = User::findBySlug($this->filterUserSelected);
+			$this->userSelected = $this->user->slug;
+		}
 		else $this->user = Auth::user();
 
 		$weeklyTimeSummary = $this->user->weeklyTimeSummary($this->weekNumber, $this->year);

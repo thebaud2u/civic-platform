@@ -18,4 +18,16 @@ class DashboardController extends Controller
 			'user'
 		));
 	}
+
+	/**
+	 * Display the user's requests.
+	 */
+	public function requests(): View
+	{
+		$user = Auth::guard('web')->user();
+
+		return view('requests', compact(
+			'user'
+		));
+	}
 }

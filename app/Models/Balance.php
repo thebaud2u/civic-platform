@@ -33,7 +33,12 @@ class Balance extends Model
 	}
 
 	// Tools
-
+	protected function formatted(): Attribute
+	{
+		return Attribute::make(
+			get: fn () => $this->user->workSchedule?->formatMinutes($this->minutes),
+		);
+	}
 
 	// Relations
 	public function user(): BelongsTo
