@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Enums\RequestTypes;
+use App\Enums\AbsenceType;
 use App\Models\User;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
@@ -51,7 +51,7 @@ class UpdateRecoveryBalances extends Command
 
 				$balance->transactions()->create([
 					'user_id' => $user->id,
-					'type' => RequestTypes::Recovery->value,
+					'type' => AbsenceType::Recovery->value,
 					'date' => $day->date,
 					'minutes' => abs($difference),
 					'way' => $difference > 0 ? 'plus' : 'minus',

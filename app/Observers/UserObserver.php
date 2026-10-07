@@ -2,7 +2,7 @@
 
 namespace App\Observers;
 
-use App\Enums\RequestTypes;
+use App\Enums\AbsenceType;
 use App\Models\User;
 
 class UserObserver
@@ -11,11 +11,11 @@ class UserObserver
 	{
 		$user->balances()->createMany([
 			[
-				'type' => RequestTypes::DayOff->value,
+				'type' => AbsenceType::DayOff->value,
 				'minutes' => 0,
 			],
 			[
-				'type' => RequestTypes::Recovery->value,
+				'type' => AbsenceType::Recovery->value,
 				'minutes' => 0,
 			],
 		]);

@@ -1,6 +1,6 @@
 <?php
 
-use App\Enums\RequestTypes;
+use App\Enums\AbsenceType;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,7 +12,7 @@ return new class extends Migration
 		Schema::create('balances', function (Blueprint $table) {
 			$table->id();
 			$table->foreignId('user_id')->constrained()->cascadeOnDelete();
-			$table->string('type')->default(RequestTypes::DayOff->value);
+			$table->string('type')->default(AbsenceType::DayOff->value);
 			$table->integer('minutes')->default(0);
 			$table->timestamps();
 

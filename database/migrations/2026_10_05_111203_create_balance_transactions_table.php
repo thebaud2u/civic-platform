@@ -1,6 +1,6 @@
 <?php
 
-use App\Enums\RequestTypes;
+use App\Enums\AbsenceType;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -13,8 +13,8 @@ return new class extends Migration
 			$table->id();
 			$table->foreignId('user_id')->nullable()->constrained()->cascadeOnDelete();
 			$table->foreignId('balance_id')->constrained()->cascadeOnDelete();
-			$table->foreignId('request_id')->nullable()->constrained()->cascadeOnDelete();
-			$table->string('type')->default(RequestTypes::DayOff->value);
+			$table->foreignId('absence_id')->nullable()->constrained()->cascadeOnDelete();
+			$table->string('type')->default(AbsenceType::DayOff->value);
 			$table->date('date')->nullable();
 			$table->unsignedInteger('minutes');
 			$table->enum('way', ['plus', 'minus']);

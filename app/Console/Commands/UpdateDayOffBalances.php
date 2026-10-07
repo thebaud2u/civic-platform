@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Enums\RequestTypes;
+use App\Enums\AbsenceType;
 use App\Models\User;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
@@ -33,7 +33,7 @@ class UpdateDayOffBalances extends Command
 				$balance->increment('minutes', $minutes);
 
 				$balance->transactions()->create([
-					'type' => RequestTypes::DayOff->value,
+					'type' => AbsenceType::DayOff->value,
 					'minutes' => $minutes,
 					'way' => 'plus',
 				]);

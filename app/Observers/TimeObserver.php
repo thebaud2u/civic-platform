@@ -2,7 +2,7 @@
 
 namespace App\Observers;
 
-use App\Enums\RequestTypes;
+use App\Enums\AbsenceType;
 use App\Models\Time;
 
 class TimeObserver
@@ -53,7 +53,7 @@ class TimeObserver
 
 		$balance->transactions()->create([
 			'user_id' => $user->id,
-			'type' => RequestTypes::Recovery->value,
+			'type' => AbsenceType::Recovery->value,
 			'date' => $time->date,
 			'minutes' => abs($difference),
 			'way' => $difference > 0 ? 'plus' : 'minus',

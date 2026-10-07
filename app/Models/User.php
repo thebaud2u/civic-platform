@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Enums\RequestTypes;
+use App\Enums\AbsenceType;
 use App\Observers\UserObserver;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
@@ -84,6 +84,11 @@ class User extends Authenticatable
 	}
 
 	// Relations
+	public function absences(): HasMany
+	{
+		return $this->hasMany(Absence::class);
+	}
+
 	public function balances(): HasMany
 	{
 		return $this->hasMany(Balance::class);
@@ -97,7 +102,7 @@ class User extends Authenticatable
 	public function dayOffBalance(): HasOne
 	{
 		return $this->hasOne(Balance::class)
-			->where('type', RequestTypes::DayOff->value);
+			->where('type', AbsenceType::DayOff->value);
 	}
 
 	public function manager(): BelongsTo
@@ -113,7 +118,7 @@ class User extends Authenticatable
 	public function recoveryBalance(): HasOne
 	{
 		return $this->hasOne(Balance::class)
-			->where('type', RequestTypes::Recovery->value);
+			->where('type', AbsenceType::Recovery->value);
 	}
 
 	public function service(): BelongsTo

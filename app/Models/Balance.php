@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Enums\RequestTypes;
+use App\Enums\AbsenceType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -24,7 +24,7 @@ class Balance extends Model
 	protected function casts(): array
 	{
 		return [
-			'type' => RequestTypes::class,
+			'type' => AbsenceType::class,
 			'minutes' => 'integer',
 			'created_at' => 'datetime',
 			'updated_at' => 'datetime',

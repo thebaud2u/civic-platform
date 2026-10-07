@@ -20,13 +20,13 @@ class DashboardController extends Controller
 	}
 
 	/**
-	 * Display the user's requests.
+	 * Display the user's absences.
 	 */
-	public function requests(): View
+	public function absences(): View
 	{
 		$user = Auth::guard('web')->user();
 
-		return view('requests', compact(
+		return view('absences', compact(
 			'user'
 		));
 	}

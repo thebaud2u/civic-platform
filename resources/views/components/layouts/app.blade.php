@@ -83,7 +83,7 @@
 							</x-nav-link>
 
 							{{-- Requests --}}
-							<x-nav-link :href="route('requests')" :active="request()->routeIs('requests')">
+							<x-nav-link :href="route('absences')" :active="request()->routeIs('absences')">
 								<svg
 									xmlns="http://www.w3.org/2000/svg"
 									fill="none"
@@ -149,7 +149,7 @@
 					</x-responsive-nav-link>
 
 					{{-- Requests --}}
-					<x-responsive-nav-link :href="route('requests')" :active="request()->routeIs('requests')">
+					<x-responsive-nav-link :href="route('absences')" :active="request()->routeIs('absences')">
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
 							fill="none"
