@@ -44,7 +44,7 @@ class Times extends Component
 
 		$this->validate($rules, $messages);
 
-		$user = Time::create([
+		Time::create([
 			'date' => $this->date,
 			'way' => $this->way,
 			'user_id' => $this->userSelected

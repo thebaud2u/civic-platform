@@ -9,8 +9,9 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable([
-	'user_id',
-	'request_id',
+	'absence_id',
+	'balance_id',
+	'manager_id',
 	'type',
 	'date',
 	'minutes',
@@ -38,9 +39,9 @@ class BalanceTransaction extends Model
 
 
 	// Relations
-	public function user(): BelongsTo
+	public function absence(): BelongsTo
 	{
-		return $this->belongsTo(User::class);
+		return $this->belongsTo(Absence::class);
 	}
 
 	public function balance(): BelongsTo
@@ -48,9 +49,9 @@ class BalanceTransaction extends Model
 		return $this->belongsTo(Balance::class);
 	}
 
-	public function request(): BelongsTo
+	public function manager(): BelongsTo
 	{
-		return $this->belongsTo(Request::class);
+		return $this->belongsTo(User::class, 'id');
 	}
 
 	// Functions

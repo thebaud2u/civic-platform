@@ -3,7 +3,7 @@
 namespace App\Livewire;
 
 use App\Enums\{AbsencePeriod, AbsenceType};
-use App\Models\{User, Time};
+use App\Models\{Absence, User};
 use App\Support\FrenchHolidays;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -35,7 +35,7 @@ class Absences extends Component
 		$start = Carbon::parse($this->start);
 		$end = Carbon::parse($this->end);
 
-		$isWorked = fn (Carbon $day) => $day->isWeekday() && ! FrenchHolidays::isHoliday($day);
+		$isWorked = fn (Carbon $day) => $day->isWeekday() && !FrenchHolidays::isHoliday($day);
 
 		$days = collect($start->daysUntil($end))->filter($isWorked)->count();
 
@@ -48,8 +48,8 @@ class Absences extends Component
 
 		$schedule = $this->user->workSchedule;
 
-		if (! $schedule) {
-			return 0; // ou lève une exception selon ton besoin
+		if (!$schedule) {
+			return 0;
 		}
 
 		return (int) round($days * $schedule->dailyMinutes());
@@ -112,12 +112,12 @@ class Absences extends Component
 			return;
 		}
 
-		if (! $this->balance || $minutes > $this->balance->minutes) {
+		if (!$this->balance || $minutes > $this->balance->minutes) {
 			$this->addError('balance', 'Votre compteur n\'est pas suffisant pour votre demande.');
 			return;
 		}
 
-		Absence::create([
+		$absence = Absence::create([
 			'type' => $this->typeSelected,
 			'user_id' => $this->user->id,
 			'start' => $this->start,
@@ -126,16 +126,16 @@ class Absences extends Component
 			'end_period' => $this->endPeriodSelected,
 		]);
 
+		$this->balance->decrement('minutes', $minutes);
+
+		$this->balance->transactions()->create([
+			'absence_id' => $absence->id,
+			'type' => $this->typeSelected,
+			'minutes' => abs($minutes),
+			'way' => 'minus',
+		]);
+
 		$this->dispatch('absence-form-complete');
-	}
-
-	public function removeFix($id)
-	{
-		$time = Time::find($id);
-
-		if ($time) {
-			$time->delete();
-		}
 	}
 
 	public function previousMonth()

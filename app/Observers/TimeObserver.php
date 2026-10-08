@@ -52,7 +52,7 @@ class TimeObserver
 		$balance->increment('minutes', $difference);
 
 		$balance->transactions()->create([
-			'user_id' => $user->id,
+			'manager_id' => $user->manager->id,
 			'type' => AbsenceType::Recovery->value,
 			'date' => $time->date,
 			'minutes' => abs($difference),
