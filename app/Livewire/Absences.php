@@ -26,8 +26,8 @@ class Absences extends Component
 
 	// Misc
 	public string $filterUserSelected = '';
-	public int $weekNumber;
-	public int $year;
+	public $month;
+	public $year;
 	public $balance;
 
 	private function absenceMinutes(): int
@@ -138,26 +138,38 @@ class Absences extends Component
 		$this->dispatch('absence-form-complete');
 	}
 
+	public function removeAbsence(int $id)
+	{
+		$absence = Absence::with('user', 'balanceTransaction.balance')->findOrFail($id);
+
+		$this->authorize('delete', $absence);
+
+		DB::transaction(function () use ($absence) {
+			if ($transaction = $absence->balanceTransaction) {
+				$transaction->balance->increment('minutes', $transaction->minutes);
+				$transaction->delete();
+			}
+
+			$absence->delete();
+		});
+	}
+
 	public function previousMonth()
 	{
-		$date = Carbon::now();
-
-		$date->setISODate($this->year, $this->weekNumber);
+		$date = Carbon::create((int) $this->year, (int) $this->month, 1);
 		$date->subMonth();
 
-		$this->weekNumber = $date->isoWeek();
-		$this->year = $date->isoWeekYear();
+		$this->month = $date->month;
+		$this->year = $date->year;
 	}
 
 	public function nextMonth()
 	{
-		$date = Carbon::now();
-
-		$date->setISODate($this->year, $this->weekNumber);
+		$date = Carbon::create((int) $this->year, (int) $this->month, 1);
 		$date->addMonth();
 
-		$this->weekNumber = $date->isoWeek();
-		$this->year = $date->isoWeekYear();
+		$this->month = $date->month;
+		$this->year = $date->year;
 	}
 
 	public function fresh()
@@ -183,21 +195,23 @@ class Absences extends Component
 		$this->user = Auth::user();
 		$date = Carbon::now();
 
-		$this->weekNumber = $date->isoWeek();
-		$this->year = $date->isoWeekYear();
+		$this->month = $date->month;
+		$this->year = $date->year;
 		$this->users = $this->user->users;
 		$this->fresh();
 	}
 
 	public function render()
 	{
-		if ($this->filterUserSelected) $this->user = User::findBySlug($this->filterUserSelected);
+		if ($this->filterUserSelected) $this->user = Auth::user()->users->firstWhere('slug', $this->filterUserSelected) ?? Auth::user();
 		else $this->user = Auth::user();
 
-		$weeklyTimeSummary = $this->user->weeklyTimeSummary($this->weekNumber, $this->year);
+		$days = $this->user->absencesCalendar((int) $this->year, (int) $this->month);
 
 		return view('livewire.absences', [
-			'user' => $this->user
+			'user' => $this->user,
+			'days' => $days,
+    		'leadingBlanks' => Carbon::create((int) $this->year, (int) $this->month, 1)->startOfDay()->isoWeekday() - 1,
 		]);
 	}
 }

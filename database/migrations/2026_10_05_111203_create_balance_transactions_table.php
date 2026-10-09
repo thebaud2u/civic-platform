@@ -19,6 +19,7 @@ return new class extends Migration
 			$table->unsignedInteger('minutes');
 			$table->enum('way', ['plus', 'minus']);
 			$table->timestamps();
+			$table->softDeletes();
 		});
 	}
 

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\AbsenceType;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -19,6 +20,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 ])]
 class BalanceTransaction extends Model
 {
+	use SoftDeletes;
+
 	/**
 	 * Get the attributes that should be cast.
 	 *
@@ -51,7 +54,7 @@ class BalanceTransaction extends Model
 
 	public function manager(): BelongsTo
 	{
-		return $this->belongsTo(User::class, 'id');
+		return $this->belongsTo(User::class);
 	}
 
 	// Functions

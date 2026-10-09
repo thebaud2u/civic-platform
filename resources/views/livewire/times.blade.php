@@ -148,60 +148,10 @@
 		@endrole
 	</header>
 
-	{{-- Navigation buttons --}}
-	<div class="flex flex-row items-center justify-between mb-8">
-		<x-primary-button
-			type="button"
-			wire:click="previousWeek"
-		>
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				fill="none"
-				viewBox="0 0 24 24"
-				stroke-width="1.5"
-				stroke="currentColor"
-				class="h-5 w-5"
-			>
-			<path
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				d="M6.75 15.75 3 12m0 0 3.75-3.75M3 12h18"
-			/>
-			</svg>
-
-			Semaine précédente
-		</x-primary-button>
-
-		<x-primary-button
-			type="button"
-			wire:click="nextWeek"
-		>
-			Semaine suivante
-
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				fill="none"
-				viewBox="0 0 24 24"
-				stroke-width="1.5"
-				stroke="currentColor"
-				class="h-5 w-5"
-			>
-			<path
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3"
-			/>
-			</svg>
-		</x-primary-button>
-	</div>
-
 	{{-- Summary of the week --}}
 	<section aria-labelledby="week-summary-title" class="mb-8">
 		<div class="mb-4">
-			<h3
-				id="week-details-title"
-				class="text-lg font-semibold text-gray-800"
-			>
+			<h3 id="week-details-title" class="text-lg font-semibold text-gray-800">
 				Résumé de la semaine {{ $weekNumber }} de {{ $year }}
 			</h3>
 		</div>
@@ -265,13 +215,57 @@
 		</div>
 	</section>
 
+	{{-- Navigation buttons --}}
+	<div class="flex flex-row items-center justify-between mb-8">
+		<x-primary-button
+			type="button"
+			wire:click="previousWeek"
+		>
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke-width="1.5"
+				stroke="currentColor"
+				class="h-5 w-5"
+			>
+			<path
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				d="M6.75 15.75 3 12m0 0 3.75-3.75M3 12h18"
+			/>
+			</svg>
+
+			Semaine précédente
+		</x-primary-button>
+
+		<x-primary-button
+			type="button"
+			wire:click="nextWeek"
+		>
+			Semaine suivante
+
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke-width="1.5"
+				stroke="currentColor"
+				class="h-5 w-5"
+			>
+			<path
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3"
+			/>
+			</svg>
+		</x-primary-button>
+	</div>
+
 	{{-- Week Detail --}}
 	<section aria-labelledby="week-details-title">
 		<div class="mb-4">
-			<h3
-				id="week-details-title"
-				class="text-lg font-semibold text-gray-800"
-			>
+			<h3 id="week-details-title" class="text-lg font-semibold text-gray-800">
 				Détail de la semaine
 			</h3>
 		</div>

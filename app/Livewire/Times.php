@@ -115,7 +115,7 @@ class Times extends Component
 	public function render()
 	{
 		if ($this->filterUserSelected) {
-			$this->user = User::findBySlug($this->filterUserSelected);
+			$this->user = Auth::user()->users->firstWhere('slug', $this->filterUserSelected) ?? Auth::user();
 			$this->userSelected = $this->user->slug;
 		}
 		else $this->user = Auth::user();

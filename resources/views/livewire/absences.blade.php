@@ -3,14 +3,14 @@
 		<div>
 			<h2 class="text-xl font-semibold text-gray-800">
 				@if($user->slug != Auth::user()->slug)
-					Les temps de {{ $user->full_name }}
+					Les demandes de {{ $user->full_name }}
 				@else
-					Mes temps
+					Mes demandes
 				@endif
 			</h2>
 
 			<p class="mt-1 text-sm text-gray-600">
-				Suivi {{ $user->slug != Auth::user()->slug ? 'des' : 'de votre' }} temps de travail pour la semaine en cours.
+				Suivi {{ $user->slug != Auth::user()->slug ? 'des' : 'de vos' }} demandes pour le mois en cours.
 			</p>
 		</div>
 
@@ -202,6 +202,39 @@
 		</div>
 	</header>
 
+	{{-- Summary of the week --}}
+	<section aria-labelledby="week-summary-title" class="mb-8">
+		<div class="mb-4">
+			<h3 id="week-details-title" class="text-lg font-semibold text-gray-800">
+				Compteurs
+			</h3>
+		</div>
+
+		<div class="grid gap-4 sm:grid-cols-3">
+			{{-- Time achieved --}}
+			<div class="rounded-lg border border-gray-200 p-5">
+				<p class="text-sm font-medium text-gray-600">
+					Congés
+				</p>
+
+				<p class="mt-2 text-2xl font-semibold text-gray-900">
+					{{ $user->dayOffBalance->formatted }}
+				</p>
+			</div>
+
+			{{-- Expected time --}}
+			<div class="rounded-lg border border-gray-200 p-5">
+				<p class="text-sm font-medium text-gray-600">
+					Récupération
+				</p>
+
+				<p class="mt-2 text-2xl font-semibold text-gray-900">
+					{{ $user->recoveryBalance->formatted }}
+				</p>
+			</div>
+		</div>
+	</section>
+
 	{{-- Navigation buttons --}}
 	<div class="flex flex-row items-center justify-between mb-8">
 		<x-primary-button
@@ -249,53 +282,56 @@
 		</x-primary-button>
 	</div>
 
-	{{-- Summary of the week --}}
-	<section aria-labelledby="week-summary-title" class="mb-8">
-		<div class="mb-4">
-			<h3
-				id="week-details-title"
-				class="text-lg font-semibold text-gray-800"
-			>
-				Compteurs
-			</h3>
-		</div>
-
-		<div class="grid gap-4 sm:grid-cols-3">
-			{{-- Time achieved --}}
-			<div class="rounded-lg border border-gray-200 p-5">
-				<p class="text-sm font-medium text-gray-600">
-					Congés
-				</p>
-
-				<p class="mt-2 text-2xl font-semibold text-gray-900">
-					{{ $user->dayOffBalance->formatted }}
-				</p>
-			</div>
-
-			{{-- Expected time --}}
-			<div class="rounded-lg border border-gray-200 p-5">
-				<p class="text-sm font-medium text-gray-600">
-					Récupération
-				</p>
-
-				<p class="mt-2 text-2xl font-semibold text-gray-900">
-					{{ $user->recoveryBalance->formatted }}
-				</p>
-			</div>
-		</div>
-	</section>
-
 	{{-- Month Detail --}}
-	<section aria-labelledby="week-details-title">
+	<section aria-labelledby="month-details-title">
 		<div class="mb-4">
-			<h3
-				id="week-details-title"
-				class="text-lg font-semibold text-gray-800"
-			>
-				
+			<h3 id="month-details-title" class="text-lg font-semibold text-gray-800 mb-2">
+				{{ ucfirst(Carbon\Carbon::create((int) $year, (int) $month, 1)->isoFormat('MMMM YYYY')) }}
 			</h3>
-		</div>
 
-		
+			<div class="grid grid-cols-7 gap-px rounded-lg bg-gray-200 text-sm">
+				@foreach(['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'] as $label)
+					<div class="bg-gray-50 p-2 text-center font-semibold">
+						{{ $label }}
+					</div>
+				@endforeach
+
+				@for($i = 0; $i < $leadingBlanks; $i++)
+					<div class="bg-white"></div>
+				@endfor
+
+				@foreach($days as $day)
+					<div class="min-h-24 bg-white p-2 {{ $day['date']->isWeekend() ? 'bg-gray-50' : '' }}">
+						<span class="font-medium">
+							{{ $day['date']->day }}
+						</span>
+
+						@if($day['date']->isWeekDay() && !App\Support\FrenchHolidays::isHoliday($day['date']))
+							@foreach($day['absences'] as $absence)
+								@php
+									$isFuture = $absence->start->isFuture();
+									$userIsCurrentUser = Auth::user()->slug == $user->slug;
+									$userIsManagedByCurrentUser = Auth::user()->hasRole('chef de service') && $user->manager?->slug == Auth::user()->slug;
+
+									$removable = $isFuture && ($userIsCurrentUser || $userIsManagedByCurrentUser);
+								@endphp
+
+								<div
+									@class([
+										'mt-1 truncate rounded px-1.5 py-0.5 text-xs',
+										'bg-blue-100' => $absence->type->value == 'day_off',
+										'bg-green-100' => $absence->type->value == 'recovery',
+										'cursor-pointer hover:opacity-80' => $removable,
+									])
+									@if($removable) wire:click="removeAbsence({{ $absence->id }})" title="Supprimer la demande" @endif
+								>
+									{{ $absence->type->label() }}
+								</div>
+							@endforeach
+						@endif
+					</div>
+				@endforeach
+			</div>
+		</div>
 	</section>
 </div>

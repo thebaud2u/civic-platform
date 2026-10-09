@@ -43,6 +43,11 @@ class Absence extends Model
 	// Tools
 
 	// Relations
+	public function balanceTransaction(): HasOne
+	{
+		return $this->hasOne(BalanceTransaction::class);
+	}
+
 	public function user(): BelongsTo
 	{
 		return $this->belongsTo(User::class);

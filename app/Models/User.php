@@ -147,6 +147,36 @@ class User extends Authenticatable
 	}
 
 	// Functions
+	public function absencesCalendar(int $year, int $month): array
+	{
+		$firstDay = Carbon::create($year, $month, 1)->startOfDay();
+		$lastDay = $firstDay->copy()->endOfMonth();
+
+		$absences = $this->absences()
+			->whereDate('start', '<=', $lastDay)
+			->whereDate('end', '>=', $firstDay)
+			->get();
+
+		$days = [];
+		foreach ($firstDay->daysUntil($lastDay) as $day) {
+			$days[$day->toDateString()] = [
+				'date' => $day,
+				'absences' => [],
+			];
+		}
+
+		foreach ($absences as $absence) {
+			$from = Carbon::parse($absence->start)->max($firstDay);
+			$to = Carbon::parse($absence->end)->min($lastDay);
+
+			foreach ($from->daysUntil($to) as $day) {
+				$days[$day->toDateString()]['absences'][] = $absence;
+			}
+		}
+
+		return $days;
+	}
+
 	public function timeOfDay(Carbon $date): ?int
 	{
 		$times = $this->times()
